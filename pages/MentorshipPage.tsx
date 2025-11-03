@@ -1,4 +1,3 @@
-import React from 'react';
 import { Student } from '../types';
 import { Card } from '../components/Card';
 import { MentorCard } from '../components/MentorCard';
@@ -6,11 +5,10 @@ import { MentorCard } from '../components/MentorCard';
 interface MentorshipPageProps {
     mentors: Student[];
     peers: Student[];
-    currentUser: Student;
     onSendMessage: (receiverId: string, text: string) => void;
 }
 
-export const MentorshipPage = ({ mentors, peers, currentUser, onSendMessage }: MentorshipPageProps) => {
+export const MentorshipPage = ({ mentors, peers, onSendMessage }: MentorshipPageProps) => {
     const handleConnect = (userId: string) => {
         // This is a simplified connect action. In a real app, this might navigate to the messages page
         // with this user pre-selected. For now, we'll send a pre-canned message.

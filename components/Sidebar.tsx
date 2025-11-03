@@ -1,6 +1,7 @@
 import React from 'react';
 import { Student } from '../types';
-import { Page } from './Dashboard';
+// FIX: Corrected import path for Page type.
+import { Page } from '../layouts/MainLayout';
 import { LogoutIcon } from './icons/LogoutIcon';
 import { HomeIcon } from './icons/HomeIcon';
 import { UserIcon } from './icons/UserIcon';

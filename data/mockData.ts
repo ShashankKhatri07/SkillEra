@@ -1,4 +1,4 @@
-import { Student, Event, Message, Appeal, Activity, Project, DailyQuest, LearningResource } from '../types';
+import { Student, Event, Message, Appeal, Project, DailyQuest, LearningResource } from '../types';
 
 type MockStudent = Student & { password?: string };
 
@@ -123,7 +123,7 @@ export const mockStudents: MockStudent[] = [
     academicPercentage: 95,
     role: 'student',
     bio: 'I lead the school\'s debate team and am passionate about public speaking.',
-    interests: ['Debate', 'Communication', 'Art'],
+    interests: ['Debate', 'Communication', 'Art', 'Design'],
     class: '12',
     section: 'A',
     admissionNumber: '12348',
@@ -271,5 +271,29 @@ export const mockLearningResources: LearningResource[] = [
         type: "video",
         url: "https://www.youtube.com/watch?v=e-P5IFTqB9c",
         tags: ["Science", "Physics", "Astronomy"]
+    },
+     {
+        id: 'lr10',
+        title: 'Learn Graphic Design Basics',
+        description: 'An engaging video series covering the fundamentals of graphic design theory, including color, typography, and layout.',
+        type: 'video',
+        url: 'https://www.youtube.com/watch?v=YqQx75OPRa0',
+        tags: ['Design', 'Art', 'Creative']
+    },
+    {
+        id: 'lr11',
+        title: 'Mastering the Art of Negotiation',
+        description: 'An insightful article from Harvard Business Review on key negotiation tactics for everyday life and business.',
+        type: 'article',
+        url: 'https://hbr.org/2021/06/the-art-of-negotiation',
+        tags: ['Communication', 'Soft Skills', 'Business']
+    },
+    {
+        id: 'lr12',
+        title: 'Introduction to Python Programming',
+        description: 'A comprehensive PDF textbook for beginners looking to learn the Python programming language from scratch.',
+        type: 'pdf',
+        url: 'https://static.realpython.com/python-basics-sample-chapters.pdf',
+        tags: ['Coding', 'Programming', 'Python']
     }
 ];

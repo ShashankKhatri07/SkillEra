@@ -3,7 +3,8 @@ import { mockLearningResources } from '../data/mockData';
 import { ResourceCard } from '../components/ResourceCard';
 import { Student } from '../types';
 import { InterestSetupPrompt } from '../components/InterestSetupPrompt';
-import { Page } from '../components/Dashboard';
+// FIX: Corrected import path for Page type.
+import { Page } from '../layouts/MainLayout';
 
 interface LearningHubPageProps {
     user: Student;

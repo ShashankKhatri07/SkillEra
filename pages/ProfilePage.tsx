@@ -1,8 +1,7 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Student } from '../types';
 import { Card } from '../components/Card';
 import { ProfileCard } from '../components/ProfileCard';
-import { allBadges } from '../data/rewards';
 import { AppealFormModal } from '../components/AppealFormModal';
 import { SecuritySettings } from '../components/SecuritySettings';
 import { validateText } from '../utils/validationUtils';

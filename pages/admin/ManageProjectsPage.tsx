@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Project } from '../../types';
 import { Card } from '../../components/Card';
 import { ProjectIcon } from '../../components/icons/ProjectIcon';

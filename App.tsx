@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Student, Role, Message, Event, Appeal, Activity, Project, DailyQuest } from './types';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
-import { MainLayout } from './components/Dashboard';
+import { MainLayout } from './layouts/MainLayout';
 import { WelcomePage } from './pages/WelcomePage';
 import { RoleSelectionPage } from './pages/RoleSelectionPage';
 import { AdminLayout } from './layouts/AdminLayout';

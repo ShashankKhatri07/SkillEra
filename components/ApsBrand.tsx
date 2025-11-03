@@ -1,4 +1,3 @@
-import React from 'react';
 import { ApsLogo } from './icons/ApsLogo';
 
 interface ApsBrandProps {

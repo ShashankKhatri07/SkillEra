@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DailyQuest } from '../../types';
 import { Card } from '../../components/Card';
 import { QuestIcon } from '../../components/icons/QuestIcon';
