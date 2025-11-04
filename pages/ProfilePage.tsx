@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+// FIX: Add missing React import.
+import React, { useState, useRef } from 'react';
 import { Student } from '../types';
 import { Card } from '../components/Card';
 import { ProfileCard } from '../components/ProfileCard';

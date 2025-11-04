@@ -1,17 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { mockLearningResources } from '../data/mockData';
 import { ResourceCard } from '../components/ResourceCard';
-import { Student } from '../types';
-import { InterestSetupPrompt } from '../components/InterestSetupPrompt';
-// FIX: Corrected import path for Page type.
+// FIX: Import LearningResource type to explicitly type map callback parameters.
+import { Student, LearningResource } from '../types';
+import { InterestSelector } from '../components/InterestSelector';
 import { Page } from '../layouts/MainLayout';
 
 interface LearningHubPageProps {
     user: Student;
     onNavigate: (page: Page) => void;
+    onUpdateUser: (user: Student) => void;
 }
 
-export const LearningHubPage = ({ user, onNavigate }: LearningHubPageProps) => {
+export const LearningHubPage = ({ user, onNavigate, onUpdateUser }: LearningHubPageProps) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState('all');
     
@@ -42,65 +43,82 @@ export const LearningHubPage = ({ user, onNavigate }: LearningHubPageProps) => {
 
     const hasNoInterests = !user.interests || user.interests.length === 0;
 
+    const handleSaveInterests = (interests: string[]) => {
+        onUpdateUser({ ...user, interests });
+    };
+
     return (
         <div className="space-y-6">
             <div>
                 <h1 className="text-3xl sm:text-4xl font-bold">Learning Hub</h1>
-                <p className="text-lg mt-1" style={{color: 'rgba(var(--color-text-main-rgb), 0.7)'}}>Explore resources to enhance your skills.</p>
+                <p className="text-lg mt-1" style={{color: 'rgba(var(--color-text-main-rgb), 0.7)'}}>
+                    {hasNoInterests ? 'Select your interests to get started.' : 'Explore resources to enhance your skills.'}
+                </p>
             </div>
 
             {hasNoInterests ? (
-                <InterestSetupPrompt onGoToProfile={() => onNavigate('profile')} />
+                <InterestSelector onSaveInterests={handleSaveInterests} />
             ) : (
                 <>
                     {recommendedResources.length > 0 && (
                         <div>
-                            <h2 className="text-2xl font-bold mb-4">Recommended for You</h2>
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-2xl font-bold">Recommended for You</h2>
+                                <button
+                                    onClick={() => onUpdateUser({ ...user, interests: [] })}
+                                    className="text-sm font-semibold hover:opacity-80"
+                                    style={{ color: 'var(--color-primary)' }}
+                                >
+                                    Change Interests
+                                </button>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {recommendedResources.map(resource => (
+                                {/* FIX: Explicitly type 'resource' to fix type inference issue on map. */}
+                                {recommendedResources.map((resource: LearningResource) => (
                                     <ResourceCard key={resource.id} resource={resource} />
                                 ))}
                             </div>
                         </div>
                     )}
+            
+                    <div>
+                        <h2 className="text-2xl font-bold my-4">{recommendedResources.length > 0 ? 'Explore All Resources' : 'All Resources'}</h2>
+                        <div className="flex flex-col sm:flex-row gap-4 sticky top-0 py-2 backdrop-blur-sm z-10">
+                            <input 
+                                type="text"
+                                placeholder="Search resources..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full sm:w-1/2 lg:w-1/3 rounded-lg p-3 bg-white border border-slate-300 focus:ring-2 focus:border-transparent"
+                                style={{'--tw-ring-color': 'var(--color-primary)'} as React.CSSProperties}
+                            />
+                            <select 
+                                value={typeFilter}
+                                onChange={(e) => setTypeFilter(e.target.value)}
+                                className="w-full sm:w-auto rounded-lg p-3 bg-white border border-slate-300 focus:ring-2 focus:border-transparent"
+                                style={{'--tw-ring-color': 'var(--color-primary)'} as React.CSSProperties}
+                            >
+                                {allTypes.map(type => (
+                                    <option key={type} value={type} className="capitalize">{type === 'all' ? 'All Types' : type}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                            {/* FIX: Explicitly type 'resource' to fix type inference issue on map. */}
+                            {filteredResources.map((resource: LearningResource) => (
+                                <ResourceCard key={resource.id} resource={resource} />
+                            ))}
+                        </div>
+                        {filteredResources.length === 0 && (
+                            <div className="text-center py-12 col-span-full">
+                                <p className="font-semibold text-lg">No resources found</p>
+                                <p style={{color: 'rgba(var(--color-text-main-rgb), 0.7)'}}>Try adjusting your search or filters.</p>
+                            </div>
+                        )}
+                    </div>
                 </>
             )}
-            
-            <div>
-                <h2 className="text-2xl font-bold mb-4">{hasNoInterests ? 'All Resources' : 'Explore All Resources'}</h2>
-                 <div className="flex flex-col sm:flex-row gap-4 sticky top-0 py-2 backdrop-blur-sm z-10">
-                    <input 
-                        type="text"
-                        placeholder="Search resources..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full sm:w-1/2 lg:w-1/3 rounded-lg p-3 bg-white border border-slate-300 focus:ring-2 focus:border-transparent"
-                        style={{'--tw-ring-color': 'var(--color-primary)'} as React.CSSProperties}
-                    />
-                    <select 
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="w-full sm:w-auto rounded-lg p-3 bg-white border border-slate-300 focus:ring-2 focus:border-transparent"
-                        style={{'--tw-ring-color': 'var(--color-primary)'} as React.CSSProperties}
-                    >
-                        {allTypes.map(type => (
-                            <option key={type} value={type} className="capitalize">{type === 'all' ? 'All Types' : type}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-                    {filteredResources.map(resource => (
-                        <ResourceCard key={resource.id} resource={resource} />
-                    ))}
-                </div>
-                {filteredResources.length === 0 && (
-                    <div className="text-center py-12 col-span-full">
-                        <p className="font-semibold text-lg">No resources found</p>
-                        <p style={{color: 'rgba(var(--color-text-main-rgb), 0.7)'}}>Try adjusting your search or filters.</p>
-                    </div>
-                )}
-            </div>
         </div>
     );
 };

@@ -1,3 +1,5 @@
+// FIX: Add missing React import for JSX.
+import React from 'react';
 import { Student } from '../types';
 import { Card } from '../components/Card';
 import { MentorCard } from '../components/MentorCard';

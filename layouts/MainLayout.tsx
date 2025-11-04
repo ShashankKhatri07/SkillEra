@@ -147,7 +147,7 @@ export const MainLayout = (props: MainLayoutProps) => {
         const otherUsers = allStudents.filter(s => s.id !== user.id && s.email !== 'principal@test.com');
         return <MessagesPage currentUser={user} otherUsers={otherUsers} messages={messages} onSendMessage={onSendMessage} />;
       case 'learningHub':
-        return <LearningHubPage user={user} onNavigate={handlePageChange} />;
+        return <LearningHubPage user={user} onNavigate={handlePageChange} onUpdateUser={onUpdateUser} />;
       case 'projects':
         return <ProjectsPage user={user} projects={projects} onJoinProject={onJoinProject} onSubmitProject={onSubmitProject} />;
       case 'mentorship':

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+// FIX: Add missing React import for JSX.
+import React, { useState } from 'react';
 import { Project, Student } from '../types';
 import { ProjectCard } from '../components/ProjectCard';
 import { SubmitProjectModal } from '../components/SubmitProjectModal';

@@ -10,7 +10,8 @@ interface ProjectCardProps {
     onSubmit: () => void;
 }
 
-export const ProjectCard = ({ project, currentUser, onJoin, onSubmit }: ProjectCardProps) => {
+// FIX: Changed component to be of type React.FC to allow passing the 'key' prop without TypeScript errors.
+export const ProjectCard: React.FC<ProjectCardProps> = ({ project, currentUser, onJoin, onSubmit }) => {
     const isMember = project.members.includes(currentUser.id);
     const hasSubmitted = currentUser.activities.some(
         act => act.type === 'project' && act.projectTitle === project.title

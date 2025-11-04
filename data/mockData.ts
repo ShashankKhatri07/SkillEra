@@ -222,15 +222,15 @@ export const mockLearningResources: LearningResource[] = [
         description: 'A downloadable PDF guide on creating and maintaining an eco-friendly garden at home or school.',
         type: 'pdf',
         url: 'https://www.epa.gov/sites/default/files/2015-09/documents/reducing_food_waste_from_farm_to_fork_and_beyond.pdf',
-        tags: ['Agriculture', 'Environment', 'Biology', 'Science']
+        tags: ['Agriculture', 'Environment', 'Biology', 'Science', 'Hobbies']
     },
     {
         id: 'lr4',
         title: "Chess Fundamentals for Beginners",
-        description: "Learn the fundamentals of chess from a grandmaster. This video covers openings, middlegame strategy, and endgame principles.",
+        description: "Learn the fundamentals of chess from International Master Levy Rozman (GothamChess). This video covers openings, middlegame strategy, and endgame principles.",
         type: "video",
         url: "https://www.youtube.com/watch?v=OCSbzArwB10",
-        tags: ["Chess", "Strategy", "Games"]
+        tags: ["Chess", "Strategy", "Games", "Hobbies"]
     },
     {
         id: 'lr5',
@@ -238,7 +238,7 @@ export const mockLearningResources: LearningResource[] = [
         description: "Explore how different colors evoke emotions and can be used to create powerful and appealing visual compositions.",
         type: "article",
         url: "https://www.verywellmind.com/color-psychology-2795824",
-        tags: ["Art", "Design", "Psychology"]
+        tags: ["Art", "Design", "Psychology", 'Creative']
     },
     {
         id: 'lr6',
@@ -246,7 +246,7 @@ export const mockLearningResources: LearningResource[] = [
         description: "A comprehensive PDF that breaks down the basics of investing, from understanding stocks to building a diversified portfolio.",
         type: "pdf",
         url: "https://www.investor.gov/sites/investorgov/files/2019-02/Beginners-Guide-to-Asset-Allocation.pdf",
-        tags: ["Finance", "Investing", "Economics"]
+        tags: ["Finance", "Investing", "Economics", 'Hobbies']
     },
     {
         id: 'lr7',
@@ -270,7 +270,7 @@ export const mockLearningResources: LearningResource[] = [
         description: "A fascinating documentary that simplifies the complex physics behind black holes and their role in the universe.",
         type: "video",
         url: "https://www.youtube.com/watch?v=e-P5IFTqB9c",
-        tags: ["Science", "Physics", "Astronomy"]
+        tags: ["Science", "Physics", "Astronomy", 'Academics']
     },
      {
         id: 'lr10',
@@ -286,7 +286,7 @@ export const mockLearningResources: LearningResource[] = [
         description: 'An insightful article from Harvard Business Review on key negotiation tactics for everyday life and business.',
         type: 'article',
         url: 'https://hbr.org/2021/06/the-art-of-negotiation',
-        tags: ['Communication', 'Soft Skills', 'Business']
+        tags: ['Communication', 'Soft Skills', 'Business', 'Leadership']
     },
     {
         id: 'lr12',
@@ -295,5 +295,21 @@ export const mockLearningResources: LearningResource[] = [
         type: 'pdf',
         url: 'https://static.realpython.com/python-basics-sample-chapters.pdf',
         tags: ['Coding', 'Programming', 'Python']
+    },
+    {
+        id: 'lr13',
+        title: 'Basketball Dribbling Drills',
+        description: 'Improve your handle with these essential basketball dribbling drills for all skill levels.',
+        type: 'video',
+        url: 'https://www.youtube.com/watch?v=1_wsdC0d_G0',
+        tags: ['Sports', 'Basketball']
+    },
+    {
+        id: 'lr14',
+        title: 'Problem Solving Strategies for Math Olympiads',
+        description: 'Learn key strategies and techniques to tackle challenging problems in mathematics competitions.',
+        type: 'pdf',
+        url: 'https://artofproblemsolving.com/wiki/images/c/c5/Eng-prob-brochure.pdf',
+        tags: ['Academics', 'Olympiads', 'Math', 'Strategy']
     }
 ];
