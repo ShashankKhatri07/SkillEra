@@ -179,7 +179,7 @@ export const MainLayout = (props: MainLayoutProps) => {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <MobileHeader onMenuClick={() => setIsSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto" style={{ backgroundColor: 'var(--color-bg-main)' }}>
             <div className="p-4 sm:p-6 lg:p-8">
