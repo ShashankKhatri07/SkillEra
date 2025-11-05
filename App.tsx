@@ -21,19 +21,50 @@ function getRandomItem<T>(arr: T[]): T | undefined {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
+const LOCAL_STORAGE_KEY = 'skillera_allStudents';
+
 const App = () => {
   const [currentUser, setCurrentUser] = useState<Student | null>(null);
-  const [allStudents, setAllStudents] =useState<Student[]>(() => {
-    // Make a deep copy of mock students to avoid modifying the original mock data
-    return JSON.parse(JSON.stringify(mockStudents)).map((student: Student) => ({
-      ...student,
-      activities: student.activities.map((activity: any) => ({
-        ...activity,
-        timestamp: new Date(activity.timestamp),
-      })),
-      lastLoginDate: student.lastLoginDate ? new Date(student.lastLoginDate).toISOString() : undefined,
+  const [allStudents, setAllStudents] = useState<Student[]>(() => {
+    try {
+      const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (storedData) {
+        const students = JSON.parse(storedData);
+        // Re-hydrate Date objects from ISO strings stored in localStorage
+        return students.map((student: Student) => ({
+          ...student,
+          activities: student.activities.map((activity: any) => ({
+            ...activity,
+            timestamp: new Date(activity.timestamp),
+          })),
+        }));
+      }
+    } catch (e) {
+      console.error("Failed to load or parse student data from localStorage", e);
+    }
+    
+    // If nothing in storage or parsing failed, initialize from mock data
+    // Deep copy mock data to avoid mutation and convert date objects
+    const initialStudents = JSON.parse(JSON.stringify(mockStudents)).map((student: Student) => ({
+        ...student,
+        activities: student.activities.map((activity: any) => ({
+            ...activity,
+            timestamp: new Date(activity.timestamp),
+        })),
+        lastLoginDate: student.lastLoginDate ? new Date(student.lastLoginDate).toISOString() : undefined,
     }));
+    return initialStudents;
   });
+  
+  // Persist allStudents state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allStudents));
+    } catch (e) {
+        console.error("Failed to save student data to localStorage", e);
+    }
+  }, [allStudents]);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [events, setEvents] = useState<Event[]>(mockEvents);
   const [appeals, setAppeals] = useState<Appeal[]>([]);
