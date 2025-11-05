@@ -1,4 +1,3 @@
-import React from 'react';
 import { ApsBrand } from './ApsBrand';
 import { MenuIcon } from './icons/MenuIcon';
 

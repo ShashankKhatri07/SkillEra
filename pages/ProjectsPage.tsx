@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Project, Student } from '../types';
 import { ProjectCard } from '../components/ProjectCard';
 import { SubmitProjectModal } from '../components/SubmitProjectModal';

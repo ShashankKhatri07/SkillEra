@@ -1,4 +1,3 @@
-import React from 'react';
 import { Student } from '../types';
 import { Card } from '../components/Card';
 import { MentorCard } from '../components/MentorCard';

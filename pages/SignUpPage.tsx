@@ -5,7 +5,7 @@ import { validateText } from '../utils/validationUtils';
 
 interface SignUpPageProps {
   role: Role;
-  onSignUp: (name: string, email: string, password: string, studentClass: string, section: string, admissionNumber: string) => Promise<'success' | 'email-in-use'>;
+  onSignUp: (name: string, email: string, studentClass: string, section: string, admissionNumber: string) => Promise<'success' | 'email-in-use'>;
   onSwitchToLogin: () => void;
   onBack: () => void;
 }
@@ -34,7 +34,7 @@ export const SignUpPage = ({ role, onSignUp, onSwitchToLogin, onBack }: SignUpPa
         return;
     }
     setError('');
-    const result = await onSignUp(name, email, password, studentClass, section, admissionNumber);
+    const result = await onSignUp(name, email, studentClass, section, admissionNumber);
     if (result === 'email-in-use') {
       setError('Could not create account. The email might already be in use.');
     }

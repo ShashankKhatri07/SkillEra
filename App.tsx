@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Student, Role, Message, Event, Appeal, Activity, Project, DailyQuest, CompetitionLevel, CompetitionResult, Quiz } from './types';
+import { Student, Role, Message, Event, Appeal, Activity, Project, DailyQuest, Quiz } from './types';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { MainLayout } from './layouts/MainLayout';
@@ -39,7 +39,7 @@ const App = () => {
   const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [projects, setProjects] = useState<Project[]>(mockProjects);
   const [dailyQuests, setDailyQuests] = useState<Omit<DailyQuest, 'status' | 'submissionText'>[]>(questTemplates);
-  const [quizzes, setQuizzes] = useState<Quiz[]>(mockQuizzes);
+  const [quizzes] = useState<Quiz[]>(mockQuizzes);
 
   const [authFlow, setAuthFlow] = useState<{ view: View; role: Role | null }>({
     view: 'homepage',
@@ -66,7 +66,7 @@ const App = () => {
     }
   }, [currentUser, authFlow.view]);
   
-  const handleLogin = async (email: string, password: string): Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'> => {
+  const handleLogin = async (email: string): Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'> => {
     // In a real app, this would be a secure API call. Here we mock it.
     // For this mock, we'll accept any password for a valid email.
     const user = allStudents.find(u => u.email === email);
@@ -104,7 +104,7 @@ const App = () => {
     return 'not-found'; // Or 'wrong-password', we can't distinguish here.
   };
 
-  const handleSignUp = async (name: string, email: string, password: string, studentClass: string, section: string, admissionNumber: string): Promise<'success' | 'email-in-use'> => {
+  const handleSignUp = async (name: string, email: string, studentClass: string, section: string, admissionNumber: string): Promise<'success' | 'email-in-use'> => {
       if (allStudents.some(u => u.email === email)) {
           return 'email-in-use';
       }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Student, Activity, DailyQuest } from '../types';
+import { Student, Activity } from '../types';
 import { Card } from '../components/Card';
 import { GoalInput } from '../components/GoalInput';
 import { GoalList } from '../components/GoalList';

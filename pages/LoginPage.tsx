@@ -4,7 +4,7 @@ import { ApsBrand } from '../components/ApsBrand';
 
 interface LoginPageProps {
   role: Role;
-  onLogin: (email: string, password: string) => Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'>;
+  onLogin: (email: string) => Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'>;
   onSwitchToSignUp: () => void;
   onBack: () => void;
 }
@@ -17,7 +17,7 @@ export const LoginPage = ({ role, onLogin, onSwitchToSignUp, onBack }: LoginPage
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const result = await onLogin(email, password);
+    const result = await onLogin(email);
     if (result === 'not-found' || result === 'wrong-password') {
       setError('Invalid email or password.');
     } else if (result === 'wrong-role') {

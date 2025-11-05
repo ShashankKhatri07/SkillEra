@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const ConsistentLearnerBadgeIcon = ({ className = "w-12 h-12" }: { className?: string }) => (
     <svg 

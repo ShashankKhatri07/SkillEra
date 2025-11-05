@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const YouTubeIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
     <svg 

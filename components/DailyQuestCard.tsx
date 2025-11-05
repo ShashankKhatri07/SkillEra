@@ -1,7 +1,5 @@
-import React from 'react';
 import { DailyQuest } from '../types';
 import { Card } from './Card';
-import { PointsIcon } from './icons/PointsIcon';
 import { CheckCircleIcon } from './icons/CheckCircleIcon';
 import { QuestIcon } from './icons/QuestIcon';
 

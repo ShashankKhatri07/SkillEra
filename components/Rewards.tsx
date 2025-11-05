@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card } from './Card';
 import { allBadges } from '../data/rewards';
 import { TrophyIcon } from './icons/TrophyIcon';

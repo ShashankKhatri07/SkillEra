@@ -1,4 +1,3 @@
-import React from 'react';
 
 // Renders the Font Awesome icon requested by the user.
 // The parent component controls the color via CSS inheritance.

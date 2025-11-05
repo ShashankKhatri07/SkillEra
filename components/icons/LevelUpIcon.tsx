@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const LevelUpIcon = ({ className = "w-12 h-12" }: { className?: string }) => (
     <svg 

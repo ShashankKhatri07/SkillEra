@@ -1,4 +1,3 @@
-import React from 'react';
 import { Activity } from '../types';
 import { Card } from './Card';
 

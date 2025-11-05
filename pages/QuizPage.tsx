@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Quiz, Question } from '../types';
 import { Card } from '../components/Card';
 import { PointsIcon } from '../components/icons/PointsIcon';

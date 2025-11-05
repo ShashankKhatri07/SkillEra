@@ -8,11 +8,12 @@ import { CompassIcon } from '../components/icons/CompassIcon';
 
 interface LearningHubPageProps {
     user: Student;
-    onNavigate: (page: Page) => void;
     onUpdateUser: (user: Student) => void;
+    // FIX: Added onNavigate prop to match what is passed from MainLayout.tsx.
+    onNavigate: (page: Page) => void;
 }
 
-export const LearningHubPage = ({ user, onNavigate, onUpdateUser }: LearningHubPageProps) => {
+export const LearningHubPage = ({ user, onUpdateUser, onNavigate }: LearningHubPageProps) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState('all');
     
@@ -70,7 +71,8 @@ export const LearningHubPage = ({ user, onNavigate, onUpdateUser }: LearningHubP
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-2xl font-bold">Recommended for You</h2>
                                 <button
-                                    onClick={() => onUpdateUser({ ...user, interests: [] })}
+                                    // FIX: Changed behavior to navigate to the profile page for editing interests, which is better UX.
+                                    onClick={() => onNavigate('profile')}
                                     className="text-sm font-semibold hover:opacity-80"
                                     style={{ color: 'var(--color-primary)' }}
                                 >
