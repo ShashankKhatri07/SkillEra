@@ -21,21 +21,22 @@ import { ProjectsPage } from '../pages/ProjectsPage';
 import { MentorshipPage } from '../pages/MentorshipPage';
 import { Page } from './layoutTypes';
 import { QuizPage } from '../pages/QuizPage';
+import { supabase } from '../services/supabaseClient';
 
 interface MainLayoutProps {
     user: Student;
     allStudents: Student[];
     projects: Project[];
-    onUpdateUser: (user: Student) => void;
+    onUpdateUser: (user: Student) => Promise<void>;
     onUpdatePassword: (currentPassword: string, newPassword: string) => Promise<'success' | 'incorrect-password'>;
     onLogout: () => void;
     messages: Message[];
     onSendMessage: (receiverId: string, text: string) => void;
     events: Event[];
-    onCreateAppeal: (claimedPercentage: number, reason: string, answerSheetUrl: string) => void;
+    onCreateAppeal: (claimedPercentage: number, reason: string, answerSheetFile: File) => void;
     onSubmitQuest: (submissionText: string) => void;
     onJoinProject: (projectId: string) => void;
-    onSubmitProject: (projectId: string, submissionUrl: string) => void;
+    onSubmitProject: (projectId: string, submissionFile: File) => void;
     quizzes: Quiz[];
     onCompleteQuiz: (quizId: string, score: number, totalQuestions: number) => void;
 }
@@ -54,12 +55,8 @@ export const MainLayout = (props: MainLayoutProps) => {
   const prevPoints = useRef(user.points);
 
   useEffect(() => {
-    // If the last login wasn't today, this logic is handled in App.tsx handleLogin
-    // This effect handles changes happening *within* a session
     const lastLogin = user.lastLoginDate ? new Date(user.lastLoginDate) : new Date();
     if (!isToday(lastLogin)) {
-        // A full login flow would refresh this, but for mock data persistence, we'll force a mini-refresh here.
-        // In a real app, you might force a re-authentication or data refresh.
         const updatedUser = { ...user, lastLoginDate: new Date().toISOString(), loginStreak: 1 };
         onUpdateUser(updatedUser);
     }
@@ -102,7 +99,26 @@ export const MainLayout = (props: MainLayoutProps) => {
     });
   };
   
-  const logCompetition = (level: CompetitionLevel, result: CompetitionResult, points: number, certificateUrl: string) => {
+  const logCompetition = async (level: CompetitionLevel, result: CompetitionResult, points: number, certificateFile: File) => {
+    if (!supabase) {
+      alert("Database not connected. Cannot upload file.");
+      setIsLogCompetitionModalOpen(false);
+      return;
+    }
+
+    // 1. Upload file to Supabase Storage
+    const fileName = `certificates/${user.id}/${Date.now()}-${certificateFile.name}`;
+    const { error: uploadError } = await supabase.storage.from('documents').upload(fileName, certificateFile);
+
+    if (uploadError) {
+        console.error('Error uploading certificate:', uploadError);
+        alert('Failed to upload certificate. Please try again.');
+        return;
+    }
+
+    // 2. Get public URL
+    const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(fileName);
+
     const newCompetition: Activity = {
         id: Date.now().toString(), text: `${result === 'won' ? 'Won' : 'Participated in'} a ${level} competition`,
         type: 'competition',
@@ -111,10 +127,10 @@ export const MainLayout = (props: MainLayoutProps) => {
         points,
         competitionLevel: level,
         result: result,
-        certificateUrl: certificateUrl,
+        certificateUrl: publicUrl,
         status: 'pending',
     };
-    onUpdateUser({
+    await onUpdateUser({
         ...user,
         activities: [newCompetition, ...user.activities],
     });

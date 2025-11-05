@@ -6,7 +6,7 @@ import { CertificateIcon } from './icons/CertificateIcon';
 
 interface LogCompetitionModalProps {
   onClose: () => void;
-  onSubmit: (level: CompetitionLevel, result: CompetitionResult, points: number, certificateUrl: string) => void;
+  onSubmit: (level: CompetitionLevel, result: CompetitionResult, points: number, certificateFile: File) => void;
 }
 
 const competitionLevels: CompetitionLevel[] = ['interhouse', 'cluster', 'district', 'state', 'national', 'international'];
@@ -18,15 +18,6 @@ const competitionPoints: Record<CompetitionLevel, { participated: number; won: n
     national: { participated: 45, won: 90 },
     international: { participated: 60, won: 120 },
 };
-
-const fileToDataUrl = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
 
 export const LogCompetitionModal = ({ onClose, onSubmit }: LogCompetitionModalProps) => {
     const [level, setLevel] = useState<CompetitionLevel>('interhouse');
@@ -47,8 +38,8 @@ export const LogCompetitionModal = ({ onClose, onSubmit }: LogCompetitionModalPr
                 setCertificateFile(null);
                 return;
             }
-            if (file.size > 1 * 1024 * 1024) { // 1MB limit
-                setFileError('File size should not exceed 1MB.');
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                setFileError('File size should not exceed 2MB.');
                 setCertificateFile(null);
                 return;
             }
@@ -62,8 +53,7 @@ export const LogCompetitionModal = ({ onClose, onSubmit }: LogCompetitionModalPr
             setFileError('A certificate upload is required.');
             return;
         }
-        const certificateUrl = await fileToDataUrl(certificateFile);
-        onSubmit(level, result, points, certificateUrl);
+        onSubmit(level, result, points, certificateFile);
     };
 
     return (
@@ -120,7 +110,7 @@ export const LogCompetitionModal = ({ onClose, onSubmit }: LogCompetitionModalPr
                                         <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/jpeg,image/png" onChange={handleFileChange} />
                                     </label>
                                 </div>
-                                <p className="text-xs" style={{ color: 'rgba(var(--color-text-main-rgb), 0.6)' }}>{certificateFile ? certificateFile.name : 'JPEG or PNG up to 1MB'}</p>
+                                <p className="text-xs" style={{ color: 'rgba(var(--color-text-main-rgb), 0.6)' }}>{certificateFile ? certificateFile.name : 'JPEG or PNG up to 2MB'}</p>
                             </div>
                         </div>
                         {fileError && <p className="text-xs text-red-500 mt-1">{fileError}</p>}

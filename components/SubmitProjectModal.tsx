@@ -1,40 +1,38 @@
 import React, { useState } from 'react';
 import { Project } from '../types';
-import { validateText } from '../utils/validationUtils';
 import { ProjectIcon } from './icons/ProjectIcon';
 
 interface SubmitProjectModalProps {
     project: Project;
     onClose: () => void;
-    onSubmit: (submissionUrl: string) => void;
+    onSubmit: (submissionFile: File) => void;
 }
 
 export const SubmitProjectModal = ({ project, onClose, onSubmit }: SubmitProjectModalProps) => {
-    const [submissionUrl, setSubmissionUrl] = useState('');
-    const [error, setError] = useState('');
+    const [submissionFile, setSubmissionFile] = useState<File | null>(null);
+    const [fileError, setFileError] = useState('');
+
+     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        setFileError('');
+        if (file) {
+            // Allow more file types for projects
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                setFileError('File size should not exceed 5MB.');
+                setSubmissionFile(null);
+                return;
+            }
+            setSubmissionFile(file);
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const validationError = validateText(submissionUrl, 'Submission Link/Text');
-        if (validationError) {
-            setError(validationError);
+        if (!submissionFile) {
+            setFileError('A submission file is required.');
             return;
         }
-        
-        // Basic URL validation
-        try {
-            // This will throw an error for non-URL text, which is fine if we allow text submissions.
-            // For stricter validation, you might add regex.
-            if (submissionUrl.startsWith('http')) {
-                 new URL(submissionUrl);
-            }
-        } catch (_) {
-            setError('Please enter a valid URL (e.g., http://github.com/...) or a text description of your submission.');
-            return;
-        }
-
-        setError('');
-        onSubmit(submissionUrl);
+        onSubmit(submissionFile);
     };
 
     return (
@@ -46,28 +44,29 @@ export const SubmitProjectModal = ({ project, onClose, onSubmit }: SubmitProject
                     </div>
                     <div>
                         <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-main)' }}>Submit Project: {project.title}</h2>
-                        <p className="text-sm" style={{ color: 'rgba(var(--color-text-main-rgb), 0.7)' }}>Provide a link to your work (e.g., GitHub, Google Drive).</p>
+                        <p className="text-sm" style={{ color: 'rgba(var(--color-text-main-rgb), 0.7)' }}>Upload your project file (e.g., PDF, ZIP, image).</p>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label htmlFor="submission-url" className="block text-sm font-medium mb-1">Submission Link or Text</label>
-                        <textarea
-                            id="submission-url"
-                            rows={3}
-                            value={submissionUrl}
-                            onChange={(e) => {
-                                setSubmissionUrl(e.target.value);
-                                if (error) setError('');
-                            }}
-                            required
-                            className="w-full rounded-lg p-2 border border-slate-300 bg-white"
-                            placeholder="e.g., https://github.com/your-repo/..."
-                        />
+                        <label htmlFor="project-file" className="block text-sm font-medium mb-1">Submission File</label>
+                        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md" style={{ borderColor: 'rgba(var(--color-text-main-rgb), 0.3)' }}>
+                            <div className="space-y-1 text-center">
+                                 <div className="mx-auto" style={{ color: 'rgba(var(--color-text-main-rgb), 0.4)' }}>
+                                  <ProjectIcon className="h-12 w-12"/>
+                                </div>
+                                <div className="flex text-sm" style={{ color: 'rgba(var(--color-text-main-rgb), 0.8)' }}>
+                                    <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium hover:opacity-80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2" style={{ color: 'var(--color-primary)', '--tw-ring-color': 'var(--color-primary)' } as React.CSSProperties}>
+                                        <span>{submissionFile ? 'Change file' : 'Upload a file'}</span>
+                                        <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
+                                    </label>
+                                </div>
+                                <p className="text-xs" style={{ color: 'rgba(var(--color-text-main-rgb), 0.6)' }}>{submissionFile ? submissionFile.name : 'Any file up to 5MB'}</p>
+                            </div>
+                        </div>
+                        {fileError && <p className="text-xs text-red-500 mt-1">{fileError}</p>}
                     </div>
-
-                    {error && <p className="text-sm text-red-600">{error}</p>}
 
                     <div className="flex gap-3 pt-4">
                         <button type="button" onClick={onClose} className="w-full bg-slate-200 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition-transform active:scale-95" style={{ color: 'var(--color-text-main)' }}>
@@ -75,7 +74,8 @@ export const SubmitProjectModal = ({ project, onClose, onSubmit }: SubmitProject
                         </button>
                         <button 
                             type="submit" 
-                            className="w-full text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition-transform active:scale-95"
+                            disabled={!submissionFile}
+                            className="w-full text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition-transform active:scale-95 disabled:bg-slate-400"
                             style={{ backgroundColor: 'var(--color-primary)' }}
                         >
                             Submit for Review

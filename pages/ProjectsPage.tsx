@@ -7,7 +7,7 @@ interface ProjectsPageProps {
     user: Student;
     projects: Project[];
     onJoinProject: (projectId: string) => void;
-    onSubmitProject: (projectId: string, submissionUrl: string) => void;
+    onSubmitProject: (projectId: string, submissionFile: File) => void;
 }
 
 export const ProjectsPage = ({ user, projects, onJoinProject, onSubmitProject }: ProjectsPageProps) => {
@@ -19,9 +19,9 @@ export const ProjectsPage = ({ user, projects, onJoinProject, onSubmitProject }:
         setIsSubmitModalOpen(true);
     };
     
-    const handleSubmit = (submissionUrl: string) => {
+    const handleSubmit = (submissionFile: File) => {
         if (submittingProject) {
-            onSubmitProject(submittingProject.id, submissionUrl);
+            onSubmitProject(submittingProject.id, submissionFile);
         }
         setIsSubmitModalOpen(false);
         setSubmittingProject(null);

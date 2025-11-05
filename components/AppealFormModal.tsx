@@ -4,17 +4,8 @@ import { validateText } from '../utils/validationUtils';
 
 interface AppealFormModalProps {
     onClose: () => void;
-    onSubmit: (claimedPercentage: number, reason: string, answerSheetUrl: string) => void;
+    onSubmit: (claimedPercentage: number, reason: string, answerSheetFile: File) => void;
 }
-
-const fileToDataUrl = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-};
 
 export const AppealFormModal = ({ onClose, onSubmit }: AppealFormModalProps) => {
     const [claimedPercentage, setClaimedPercentage] = useState('');
@@ -59,8 +50,7 @@ export const AppealFormModal = ({ onClose, onSubmit }: AppealFormModalProps) => 
             setFileError('An answer sheet upload is required.');
             return;
         }
-        const answerSheetUrl = await fileToDataUrl(answerSheetFile);
-        onSubmit(percentage, reason, answerSheetUrl);
+        onSubmit(percentage, reason, answerSheetFile);
     };
 
     return (
