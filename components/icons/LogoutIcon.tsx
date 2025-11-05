@@ -1,6 +1,3 @@
-
-
-
 import React from 'react';
 
 export const LogoutIcon = ({ className = "w-6 h-6" }: { className?: string }) => (

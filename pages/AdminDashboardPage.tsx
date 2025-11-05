@@ -5,14 +5,16 @@ import { ClassPerformanceChart } from '../components/admin/ClassPerformanceChart
 import { Card } from '../components/Card';
 import { BarChartIcon } from '../components/icons/BarChartIcon';
 import { VerificationQueue } from '../components/admin/VerificationQueue';
+import { QuestVerificationQueue } from '../components/admin/QuestVerificationQueue';
 
 interface AdminDashboardPageProps {
   allStudents: Student[];
   onViewStudentProfile: (studentId: string) => void;
   onResolveSubmission: (studentId: string, activityId: string, status: 'approved' | 'rejected') => void;
+  onResolveQuest: (studentId: string, status: 'approved' | 'rejected') => void;
 }
 
-export const AdminDashboardPage = ({ allStudents, onViewStudentProfile, onResolveSubmission }: AdminDashboardPageProps) => {
+export const AdminDashboardPage = ({ allStudents, onViewStudentProfile, onResolveSubmission, onResolveQuest }: AdminDashboardPageProps) => {
   const [classFilter, setClassFilter] = useState('all');
   const [sectionFilter, setSectionFilter] = useState('all');
   
@@ -40,6 +42,12 @@ export const AdminDashboardPage = ({ allStudents, onViewStudentProfile, onResolv
     });
     return submissions.sort((a, b) => b.activity.timestamp.getTime() - a.activity.timestamp.getTime());
   }, [studentUsers]);
+  
+  const pendingQuests = useMemo(() => {
+      return studentUsers
+          .filter(student => student.dailyQuest?.status === 'pending')
+          .map(student => ({ student, quest: student.dailyQuest! }));
+  }, [studentUsers]);
 
   const classPerformanceData = useMemo(() => {
     const classes = Array.from(new Set(studentUsers.map(s => s.class)));
@@ -66,7 +74,11 @@ export const AdminDashboardPage = ({ allStudents, onViewStudentProfile, onResolv
          <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
       </div>
       
-      <VerificationQueue submissions={pendingSubmissions} onResolve={onResolveSubmission} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <VerificationQueue submissions={pendingSubmissions} onResolve={onResolveSubmission} />
+        <QuestVerificationQueue submissions={pendingQuests} onResolve={onResolveQuest} />
+      </div>
+
 
       <Card 
         title="Class Performance Analytics" 

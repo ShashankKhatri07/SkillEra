@@ -1,4 +1,3 @@
-// FIX: Add missing React import.
 import React, { useState, useRef } from 'react';
 import { Student } from '../types';
 import { Card } from '../components/Card';
@@ -151,7 +150,7 @@ export const ProfilePage = ({ user, onUpdateUser, onUpdatePassword, onCreateAppe
                             onChange={(e) => setBio(e.target.value)}
                             onBlur={handleBioSave}
                             className="w-full border-slate-300 rounded-lg p-3 focus:ring-2 focus:border-transparent transition duration-150 ease-in-out resize-y bg-white min-h-[100px]"
-                            style={{'--tw-ring-color': 'var(--color-accent-1)'} as React.CSSProperties}
+                            style={{'--tw-ring-color': 'var(--color-accent)'} as React.CSSProperties}
                             placeholder="Tell everyone a little about yourself..."
                         />
                         <button onClick={handleBioSave} className="mt-2 text-white font-semibold py-1 px-3 rounded-lg text-sm" style={{ backgroundColor: 'var(--color-primary)' }}>Save</button>

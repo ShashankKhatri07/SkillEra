@@ -13,7 +13,7 @@ export const AwaitingVerificationPage = ({ onVerify, onBackToLogin }: AwaitingVe
       <div className="w-full max-w-md flex-grow flex flex-col justify-center text-center">
         <div className="flex flex-col items-center mb-6">
            <ApsBrand />
-           <div className="p-4 rounded-full my-6" style={{ backgroundColor: 'var(--color-accent-1)', color: 'var(--color-text-main)' }}>
+           <div className="p-4 rounded-full my-6" style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-text-main)' }}>
                 <MailIcon className="w-10 h-10" />
            </div>
            <h1 className="text-3xl font-bold">Verify Your Email</h1>

@@ -33,7 +33,6 @@ export const InterestSelector = ({ onSaveInterests }: InterestSelectorProps) => 
 
     const handleSave = () => {
         // We'll save all the specific tags from the selected categories as the user's interests.
-        // FIX: Explicitly type `interestsToSave` as string[] to resolve type inference issue.
         const interestsToSave: string[] = selected.flatMap(categoryName => {
             const category = interestCategories.find(c => c.name === categoryName);
             return category ? category.tags : [];

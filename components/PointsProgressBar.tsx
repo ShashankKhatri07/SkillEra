@@ -1,6 +1,3 @@
-
-
-
 import React from 'react';
 import { Card } from './Card';
 import { getUserLevelInfo, getNextLevelInfo } from '../utils/levelUtils';
@@ -27,7 +24,7 @@ export const PointsProgressBar = ({ userPoints }: PointsProgressBarProps) => {
                     Progress to <span className="font-bold">Level {nextLevel.level}: {nextLevel.name}</span>
                  </p>
             ) : (
-                <p className="text-sm font-semibold" style={{ color: 'var(--color-accent-2)' }}>You've reached the maximum level!</p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-accent-secondary)' }}>You've reached the maximum level!</p>
             )}
             <p className="text-sm font-bold" style={{ color: 'var(--color-text-main)' }}>{userPoints} / {targetPoints} pts</p>
         </div>

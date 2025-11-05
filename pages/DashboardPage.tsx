@@ -1,11 +1,12 @@
-import React from 'react';
-import { Student, Activity } from '../types';
+import React, { useState } from 'react';
+import { Student, Activity, DailyQuest } from '../types';
 import { Card } from '../components/Card';
 import { GoalInput } from '../components/GoalInput';
 import { GoalList } from '../components/GoalList';
 import { AchievementList } from '../components/AchievementList';
 import { PodiumIcon } from '../components/icons/PodiumIcon';
 import { DailyQuestCard } from '../components/DailyQuestCard';
+import { QuestSubmissionModal } from '../components/QuestSubmissionModal';
 
 interface DashboardPageProps {
   user: Student;
@@ -13,7 +14,7 @@ interface DashboardPageProps {
   completeGoal: (id: string) => void;
   onViewCertificate: (activity: Activity) => void;
   onLogCompetitionClick: () => void;
-  onClaimQuestReward: () => void;
+  onSubmitQuest: (submissionText: string) => void;
 }
 
 export const DashboardPage = ({
@@ -22,18 +23,32 @@ export const DashboardPage = ({
   completeGoal,
   onViewCertificate,
   onLogCompetitionClick,
-  onClaimQuestReward
+  onSubmitQuest
 }: DashboardPageProps) => {
+  const [isQuestModalOpen, setIsQuestModalOpen] = useState(false);
+
+  const handleQuestSubmit = (submissionText: string) => {
+      onSubmitQuest(submissionText);
+      setIsQuestModalOpen(false);
+  };
 
   return (
     <div>
+        {isQuestModalOpen && user.dailyQuest && (
+            <QuestSubmissionModal
+                quest={user.dailyQuest}
+                onClose={() => setIsQuestModalOpen(false)}
+                onSubmit={handleQuestSubmit}
+            />
+        )}
+
         <h1 className="text-3xl sm:text-4xl font-bold mb-2">Hello, {user.name}! 👋</h1>
         <p className="text-lg mb-6" style={{color: 'rgba(var(--color-text-main-rgb), 0.7)'}}>Ready to conquer your goals today?</p>
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
             {/* Left Column */}
             <div className="xl:col-span-7 space-y-6">
                 {user.dailyQuest && (
-                    <DailyQuestCard quest={user.dailyQuest} onClaim={onClaimQuestReward} />
+                    <DailyQuestCard quest={user.dailyQuest} onSubmit={() => setIsQuestModalOpen(true)} />
                 )}
                 <Card>
                 <div className="space-y-4">

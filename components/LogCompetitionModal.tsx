@@ -87,7 +87,7 @@ export const LogCompetitionModal = ({ onClose, onSubmit }: LogCompetitionModalPr
                             value={level}
                             onChange={e => setLevel(e.target.value as CompetitionLevel)}
                             className="w-full rounded-lg p-2 focus:ring-2 focus:border-transparent transition duration-150 ease-in-out bg-white"
-                            style={{ '--tw-ring-color': 'var(--color-accent-1)', borderColor: 'rgba(var(--color-text-main-rgb), 0.3)' } as React.CSSProperties}
+                            style={{ '--tw-ring-color': 'var(--color-accent)', borderColor: 'rgba(var(--color-text-main-rgb), 0.3)' } as React.CSSProperties}
                         >
                             {competitionLevels.map(l => <option key={l} value={l} className="capitalize">{l.charAt(0).toUpperCase() + l.slice(1)}</option>)}
                         </select>

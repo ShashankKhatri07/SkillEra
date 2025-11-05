@@ -3,8 +3,10 @@ import { DailyQuest } from '../../types';
 import { validateText } from '../../utils/validationUtils';
 
 interface QuestModalProps {
-    quest: Omit<DailyQuest, 'completed'> | null;
-    onSave: (questData: Omit<DailyQuest, 'id' | 'completed'> | Omit<DailyQuest, 'completed'>) => void;
+    // FIX: Corrected Omit type for quest and onSave props. 'completed' is not a valid property of DailyQuest.
+    // The correct type refers to quest templates, which lack 'status' and 'submissionText'.
+    quest: Omit<DailyQuest, 'status' | 'submissionText'> | null;
+    onSave: (questData: Omit<DailyQuest, 'id' | 'status' | 'submissionText'> | Omit<DailyQuest, 'status' | 'submissionText'>) => void;
     onClose: () => void;
 }
 

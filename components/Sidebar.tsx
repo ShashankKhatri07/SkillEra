@@ -1,7 +1,6 @@
 import React from 'react';
 import { Student } from '../types';
-// FIX: Corrected import path for Page type.
-import { Page } from '../layouts/MainLayout';
+import { Page } from '../layouts/layoutTypes';
 import { LogoutIcon } from './icons/LogoutIcon';
 import { HomeIcon } from './icons/HomeIcon';
 import { UserIcon } from './icons/UserIcon';
@@ -14,6 +13,7 @@ import { BookOpenIcon } from './icons/BookOpenIcon';
 import { ProjectIcon } from './icons/ProjectIcon';
 import { MentorIcon } from './icons/MentorIcon';
 import { StreakIcon } from './icons/StreakIcon';
+import { QuizIcon } from './icons/QuizIcon';
 
 interface SidebarProps {
   user: Student;
@@ -62,6 +62,7 @@ export const Sidebar = ({ user, onLogout, activePage, setActivePage, isOpen, onC
     { id: 'learningHub', label: 'Learning Hub', icon: <BookOpenIcon className="w-5 h-5" /> },
     { id: 'projects', label: 'Projects', icon: <ProjectIcon className="w-5 h-5" /> },
     { id: 'mentorship', label: 'Mentorship', icon: <MentorIcon className="w-5 h-5" /> },
+    { id: 'quizzes', label: 'Quizzes', icon: <QuizIcon className="w-5 h-5" /> },
     { id: 'profile', label: 'Profile', icon: <UserIcon className="w-5 h-5" /> },
     { id: 'leaderboard', label: 'Leaderboard', icon: <TrophyIcon className="w-5 h-5" /> },
     { id: 'rewards', label: 'My Rewards', icon: <BadgeIcon className="w-5 h-5" /> },
@@ -76,7 +77,7 @@ export const Sidebar = ({ user, onLogout, activePage, setActivePage, isOpen, onC
         onClick={onClose}
       ></div>
 
-      <aside className={`fixed inset-y-0 left-0 w-64 flex-shrink-0 flex flex-col p-4 border-r z-40 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ backgroundColor: 'var(--color-accent-1)', borderColor: 'rgba(47, 79, 79, 0.1)' }}>
+      <aside className={`fixed inset-y-0 left-0 w-64 flex-shrink-0 flex flex-col p-4 border-r z-40 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ backgroundColor: 'var(--color-bg-main)', borderColor: 'rgba(47, 79, 79, 0.1)' }}>
         <div className="px-2 mb-8">
           <ApsBrand layout="horizontal" />
         </div>

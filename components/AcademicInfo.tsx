@@ -11,9 +11,9 @@ const CircularProgressBar = ({ percentage }: { percentage: number }) => {
   const offset = circumference - (percentage / 100) * circumference;
 
   const getStrokeColor = (p: number) => {
-    if (p >= 75) return 'var(--color-text-main)';
-    if (p >= 40) return 'var(--color-accent-2)';
-    return 'var(--color-accent-1)';
+    if (p >= 75) return 'var(--color-accent-secondary)'; // Green for good
+    if (p >= 40) return 'var(--color-primary)'; // Navy for okay
+    return 'var(--color-accent)'; // Pink for warning
   }
 
   return (

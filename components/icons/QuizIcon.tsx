@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const ConsistentLearnerBadgeIcon = ({ className = "w-12 h-12" }: { className?: string }) => (
+export const QuizIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
         className={className}
@@ -11,7 +11,8 @@ export const ConsistentLearnerBadgeIcon = ({ className = "w-12 h-12" }: { classN
         strokeLinecap="round" 
         strokeLinejoin="round"
     >
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+        <polyline points="14 2 14 8 20 8" />
+        <path d="m9.5 12.5 2 2 4-4" />
     </svg>
 );

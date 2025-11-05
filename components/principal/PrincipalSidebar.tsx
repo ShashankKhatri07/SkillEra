@@ -5,7 +5,7 @@ import { HomeIcon } from '../icons/HomeIcon';
 import { UserIcon } from '../icons/UserIcon';
 import { UsersIcon } from '../icons/UsersIcon';
 import { ApsBrand } from '../ApsBrand';
-import { PrincipalPage } from '../../layouts/PrincipalLayout';
+import { PrincipalPage } from '../../layouts/layoutTypes';
 import { BellIcon } from '../icons/BellIcon';
 import { ProjectIcon } from '../icons/ProjectIcon';
 import { QuestIcon } from '../icons/QuestIcon';

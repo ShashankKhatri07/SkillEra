@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 
 export const BellIcon = ({ className = "w-6 h-6" }: { className?: string }) => (

@@ -7,7 +7,7 @@ import { ApsBrand } from '../ApsBrand';
 import { MailIcon } from '../icons/MailIcon';
 import { TrophyIcon } from '../icons/TrophyIcon';
 import { BellIcon } from '../icons/BellIcon';
-import { AdminPage } from '../../layouts/AdminLayout';
+import { AdminPage } from '../../layouts/layoutTypes';
 import { UsersIcon } from '../icons/UsersIcon';
 import { ProjectIcon } from '../icons/ProjectIcon';
 import { QuestIcon } from '../icons/QuestIcon';

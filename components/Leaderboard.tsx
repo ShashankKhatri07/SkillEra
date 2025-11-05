@@ -1,6 +1,3 @@
-
-
-
 import React from 'react';
 import { Student } from '../types';
 import { Card } from './Card';
@@ -15,9 +12,9 @@ interface LeaderboardProps {
 
 const getRankStyle = (rank: number): React.CSSProperties => {
     switch (rank) {
-        case 0: return { backgroundColor: 'var(--color-accent-2)', color: 'var(--color-text-main)' };
-        case 1: return { backgroundColor: 'var(--color-accent-1)', color: 'var(--color-text-main)' };
-        case 2: return { backgroundColor: 'var(--color-bg-main)', color: 'var(--color-text-main)', border: '1px solid var(--color-accent-1)' };
+        case 0: return { backgroundColor: 'var(--color-accent-secondary)', color: 'var(--color-text-main)' };
+        case 1: return { backgroundColor: 'var(--color-accent)', color: 'var(--color-text-main)' };
+        case 2: return { backgroundColor: 'var(--color-bg-main)', color: 'var(--color-text-main)', border: '1px solid var(--color-accent)' };
         default: return { backgroundColor: 'rgba(var(--color-text-main-rgb), 0.1)', color: 'var(--color-text-main)' };
     }
 }

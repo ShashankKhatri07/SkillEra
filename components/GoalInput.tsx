@@ -29,7 +29,7 @@ export const GoalInput = ({ addGoal }: GoalInputProps) => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <textarea
           className="w-full border-slate-300 rounded-lg p-3 focus:ring-2 focus:border-transparent transition duration-150 ease-in-out resize-none bg-white"
-          style={{'--tw-ring-color': 'var(--color-accent-1)'} as React.CSSProperties}
+          style={{'--tw-ring-color': 'var(--color-accent)'} as React.CSSProperties}
           placeholder="What's your next personal goal?"
           value={text}
           onChange={(e) => {

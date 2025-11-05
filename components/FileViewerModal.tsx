@@ -3,7 +3,6 @@ import React from 'react';
 interface FileViewerModalProps {
   fileUrl: string;
   onClose: () => void;
-  // FIX: Added optional title prop to fix type error when passing title from parent components.
   title?: string;
 }
 

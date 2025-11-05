@@ -19,7 +19,7 @@ export const GoalList = ({ activities, completeGoal }: GoalListProps) => {
               <span style={{ color: 'var(--color-text-main)' }}>{goal.text}</span>
               <button
                 onClick={() => completeGoal(goal.id)}
-                className="group p-1.5 rounded-full hover:bg-[var(--color-accent-2)] transition-colors duration-200"
+                className="group p-1.5 rounded-full hover:bg-[var(--color-accent-secondary)] transition-colors duration-200"
                 aria-label="Complete goal"
               >
                 <svg className="w-6 h-6 group-hover:text-[var(--color-primary)] transition-colors" style={{ color: 'rgba(var(--color-text-main-rgb), 0.5)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">

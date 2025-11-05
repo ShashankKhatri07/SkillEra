@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Activity, Student, Event, Badge, CompetitionLevel, CompetitionResult, Level, Message, Project } from '../types';
+import { Activity, Student, Event, Badge, CompetitionLevel, CompetitionResult, Level, Message, Project, Quiz } from '../types';
 import { allBadges } from '../data/rewards';
 import { getUserLevelInfo } from '../utils/levelUtils';
 import { isToday } from '../utils/dateUtils';
@@ -19,6 +19,8 @@ import { CertificateModal } from '../components/CertificateModal';
 import { LearningHubPage } from '../pages/LearningHubPage';
 import { ProjectsPage } from '../pages/ProjectsPage';
 import { MentorshipPage } from '../pages/MentorshipPage';
+import { Page } from './layoutTypes';
+import { QuizPage } from '../pages/QuizPage';
 
 interface MainLayoutProps {
     user: Student;
@@ -31,17 +33,17 @@ interface MainLayoutProps {
     onSendMessage: (receiverId: string, text: string) => void;
     events: Event[];
     onCreateAppeal: (claimedPercentage: number, reason: string, answerSheetUrl: string) => void;
-    onClaimQuestReward: () => void;
+    onSubmitQuest: (submissionText: string) => void;
     onJoinProject: (projectId: string) => void;
     onSubmitProject: (projectId: string, submissionUrl: string) => void;
+    quizzes: Quiz[];
+    onCompleteQuiz: (quizId: string, score: number, totalQuestions: number) => void;
 }
-
-export type Page = 'dashboard' | 'profile' | 'leaderboard' | 'rewards' | 'events' | 'messages' | 'learningHub' | 'projects' | 'mentorship';
 
 const POINTS_PER_GOAL = 10;
 
 export const MainLayout = (props: MainLayoutProps) => {
-  const { user, allStudents, projects, onUpdateUser, onUpdatePassword, onLogout, messages, onSendMessage, events, onCreateAppeal, onClaimQuestReward, onJoinProject, onSubmitProject } = props;
+  const { user, allStudents, projects, onUpdateUser, onUpdatePassword, onLogout, messages, onSendMessage, events, onCreateAppeal, onSubmitQuest, onJoinProject, onSubmitProject, quizzes, onCompleteQuiz } = props;
   const [activePage, setActivePage] = useState<Page>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
@@ -133,7 +135,7 @@ export const MainLayout = (props: MainLayoutProps) => {
                     completeGoal={completeGoal}
                     onViewCertificate={setViewingCertificate}
                     onLogCompetitionClick={() => setIsLogCompetitionModalOpen(true)}
-                    onClaimQuestReward={onClaimQuestReward}
+                    onSubmitQuest={onSubmitQuest}
                 />;
       case 'profile':
         return <ProfilePage user={user} onUpdateUser={onUpdateUser} onUpdatePassword={onUpdatePassword} onCreateAppeal={onCreateAppeal} />;
@@ -154,8 +156,10 @@ export const MainLayout = (props: MainLayoutProps) => {
         const mentors = allStudents.filter(s => s.isMentor && s.id !== user.id);
         const peers = allStudents.filter(s => s.role === 'student' && !s.isMentor && s.id !== user.id);
         return <MentorshipPage mentors={mentors} peers={peers} onSendMessage={onSendMessage} />;
+      case 'quizzes':
+        return <QuizPage quizzes={quizzes} onCompleteQuiz={onCompleteQuiz} />;
       default:
-        return <DashboardPage user={user} addGoal={addGoal} completeGoal={completeGoal} onViewCertificate={setViewingCertificate} onLogCompetitionClick={() => setIsLogCompetitionModalOpen(true)} onClaimQuestReward={onClaimQuestReward} />;
+        return <DashboardPage user={user} addGoal={addGoal} completeGoal={completeGoal} onViewCertificate={setViewingCertificate} onLogCompetitionClick={() => setIsLogCompetitionModalOpen(true)} onSubmitQuest={onSubmitQuest} />;
     }
   };
   

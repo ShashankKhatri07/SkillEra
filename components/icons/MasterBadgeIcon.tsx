@@ -1,6 +1,3 @@
-
-
-
 import React from 'react';
 
 export const MasterBadgeIcon = ({ className = "w-12 h-12" }: { className?: string }) => (

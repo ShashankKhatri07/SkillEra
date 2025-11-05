@@ -19,7 +19,6 @@ const ResourceIcon = ({ type }: { type: LearningResource['type'] }) => {
     }
 };
 
-// FIX: Changed component to be of type React.FC to allow passing the 'key' prop without TypeScript errors.
 export const ResourceCard: React.FC<ResourceCardProps> = ({ resource }) => {
     return (
         <a href={resource.url} target="_blank" rel="noopener noreferrer" className="block h-full">

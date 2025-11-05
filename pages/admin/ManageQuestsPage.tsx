@@ -6,17 +6,19 @@ import { QuestModal } from '../../components/admin/QuestModal';
 import { TrashIcon } from '../../components/icons/TrashIcon';
 
 interface ManageQuestsPageProps {
-    quests: Omit<DailyQuest, 'completed'>[];
-    onAddQuest: (quest: Omit<DailyQuest, 'id' | 'completed'>) => void;
-    onUpdateQuest: (quest: Omit<DailyQuest, 'completed'>) => void;
+    // FIX: Corrected Omit type for quests and its handler functions. 'completed' is not a valid property of DailyQuest.
+    // The correct type refers to quest templates, which lack 'status' and 'submissionText'.
+    quests: Omit<DailyQuest, 'status' | 'submissionText'>[];
+    onAddQuest: (quest: Omit<DailyQuest, 'id' | 'status' | 'submissionText'>) => void;
+    onUpdateQuest: (quest: Omit<DailyQuest, 'status' | 'submissionText'>) => void;
     onDeleteQuest: (questId: string) => void;
 }
 
 export const ManageQuestsPage = ({ quests, onAddQuest, onUpdateQuest, onDeleteQuest }: ManageQuestsPageProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingQuest, setEditingQuest] = useState<Omit<DailyQuest, 'completed'> | null>(null);
+    const [editingQuest, setEditingQuest] = useState<Omit<DailyQuest, 'status' | 'submissionText'> | null>(null);
 
-    const handleEdit = (quest: Omit<DailyQuest, 'completed'>) => {
+    const handleEdit = (quest: Omit<DailyQuest, 'status' | 'submissionText'>) => {
         setEditingQuest(quest);
         setIsModalOpen(true);
     };
@@ -26,7 +28,7 @@ export const ManageQuestsPage = ({ quests, onAddQuest, onUpdateQuest, onDeleteQu
         setIsModalOpen(true);
     };
 
-    const handleSave = (questData: Omit<DailyQuest, 'id' | 'completed'> | Omit<DailyQuest, 'completed'>) => {
+    const handleSave = (questData: Omit<DailyQuest, 'id' | 'status' | 'submissionText'> | Omit<DailyQuest, 'status' | 'submissionText'>) => {
         if ('id' in questData) {
             onUpdateQuest(questData);
         } else {

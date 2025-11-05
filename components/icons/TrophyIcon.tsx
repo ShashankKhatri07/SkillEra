@@ -1,5 +1,7 @@
+import React from 'react';
 
-export const TrophyIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+// FIX: Updated component props to accept all standard SVG attributes (like `style`) by using React.ComponentProps<'svg'>. This resolves the type error in QuizPage.tsx.
+export const TrophyIcon = ({ className = "w-6 h-6", ...props }: React.ComponentProps<'svg'>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -9,6 +11,7 @@ export const TrophyIcon = ({ className = "w-6 h-6" }: { className?: string }) =>
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    {...props}
   >
     <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
     <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />

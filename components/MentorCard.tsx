@@ -8,7 +8,6 @@ interface MentorCardProps {
     onConnect: (userId: string) => void;
 }
 
-// FIX: Changed component to be of type React.FC to allow passing the 'key' prop without TypeScript errors.
 export const MentorCard: React.FC<MentorCardProps> = ({ user, isPeer = false, onConnect }) => {
     return (
         <Card className="flex flex-col items-center text-center">

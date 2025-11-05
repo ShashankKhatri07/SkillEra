@@ -9,6 +9,7 @@ import { StudentProfilePage } from '../pages/admin/StudentProfilePage';
 import { ManageProjectsPage } from '../pages/admin/ManageProjectsPage';
 import { ManageQuestsPage } from '../pages/admin/ManageQuestsPage';
 import { EventsPage } from '../pages/EventsPage';
+import { PrincipalPage } from './layoutTypes';
 
 
 interface PrincipalLayoutProps {
@@ -27,13 +28,13 @@ interface PrincipalLayoutProps {
     onAddProject: (project: Omit<Project, 'id' | 'members'>) => void;
     onUpdateProject: (project: Project) => void;
     onDeleteProject: (projectId: string) => void;
-    dailyQuests: Omit<DailyQuest, 'completed'>[];
-    onAddQuest: (quest: Omit<DailyQuest, 'id' | 'completed'>) => void;
-    onUpdateQuest: (quest: Omit<DailyQuest, 'completed'>) => void;
+    // FIX: Corrected Omit type for dailyQuests and its handler functions. 'completed' is not a valid property of DailyQuest.
+    // The correct type refers to quest templates, which lack 'status' and 'submissionText'.
+    dailyQuests: Omit<DailyQuest, 'status' | 'submissionText'>[];
+    onAddQuest: (quest: Omit<DailyQuest, 'id' | 'status' | 'submissionText'>) => void;
+    onUpdateQuest: (quest: Omit<DailyQuest, 'status' | 'submissionText'>) => void;
     onDeleteQuest: (questId: string) => void;
 }
-
-export type PrincipalPage = 'dashboard' | 'profile' | 'allStudents' | 'events' | 'manageProjects' | 'manageQuests';
 
 export const PrincipalLayout = (props: PrincipalLayoutProps) => {
   const { 

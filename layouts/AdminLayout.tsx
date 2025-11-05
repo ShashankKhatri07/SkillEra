@@ -12,6 +12,7 @@ import { MobileHeader } from '../components/MobileHeader';
 import { AllStudentsPage } from '../pages/admin/AllStudentsPage';
 import { ManageProjectsPage } from '../pages/admin/ManageProjectsPage';
 import { ManageQuestsPage } from '../pages/admin/ManageQuestsPage';
+import { AdminPage } from './layoutTypes';
 
 interface AdminLayoutProps {
     user: Student;
@@ -27,22 +28,21 @@ interface AdminLayoutProps {
     onUpdateEvent: (event: Event) => void;
     onDeleteEvent: (eventId: string) => void;
     onResolveSubmission: (studentId: string, activityId: string, status: 'approved' | 'rejected') => void;
+    onResolveQuest: (studentId: string, status: 'approved' | 'rejected') => void;
     projects: Project[];
     onAddProject: (project: Omit<Project, 'id' | 'members'>) => void;
     onUpdateProject: (project: Project) => void;
     onDeleteProject: (projectId: string) => void;
-    dailyQuests: Omit<DailyQuest, 'completed'>[];
-    onAddQuest: (quest: Omit<DailyQuest, 'id' | 'completed'>) => void;
-    onUpdateQuest: (quest: Omit<DailyQuest, 'completed'>) => void;
+    dailyQuests: Omit<DailyQuest, 'status' | 'submissionText'>[];
+    onAddQuest: (quest: Omit<DailyQuest, 'id' | 'status' | 'submissionText'>) => void;
+    onUpdateQuest: (quest: Omit<DailyQuest, 'status' | 'submissionText'>) => void;
     onDeleteQuest: (questId: string) => void;
 }
-
-export type AdminPage = 'dashboard' | 'profile' | 'messages' | 'leaderboard' | 'events' | 'allStudents' | 'manageProjects' | 'manageQuests';
 
 export const AdminLayout = (props: AdminLayoutProps) => {
   const { 
     user, allStudents, onLogout, onUpdateStudent, onUpdateAdmin, onUpdatePassword, 
-    messages, onSendMessage, events, onAddEvent, onUpdateEvent, onDeleteEvent, onResolveSubmission,
+    messages, onSendMessage, events, onAddEvent, onUpdateEvent, onDeleteEvent, onResolveSubmission, onResolveQuest,
     projects, onAddProject, onUpdateProject, onDeleteProject,
     dailyQuests, onAddQuest, onUpdateQuest, onDeleteQuest
   } = props;
@@ -72,6 +72,7 @@ export const AdminLayout = (props: AdminLayoutProps) => {
                        allStudents={studentUsers} 
                        onViewStudentProfile={setViewingStudentId}
                        onResolveSubmission={onResolveSubmission}
+                       onResolveQuest={onResolveQuest}
                    />;
         case 'allStudents':
             return <AllStudentsPage allStudents={studentUsers} onViewStudent={setViewingStudentId} />;
@@ -109,6 +110,7 @@ export const AdminLayout = (props: AdminLayoutProps) => {
                        allStudents={studentUsers} 
                        onViewStudentProfile={setViewingStudentId}
                        onResolveSubmission={onResolveSubmission}
+                       onResolveQuest={onResolveQuest}
                    />;
     }
   };

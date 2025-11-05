@@ -3,10 +3,25 @@ import React from 'react';
 export type CompetitionLevel = 'interhouse' | 'cluster' | 'district' | 'state' | 'national' | 'international';
 export type CompetitionResult = 'participated' | 'won';
 
+export interface Question {
+  id: string;
+  text: string;
+  options: string[];
+  correctAnswer: string;
+}
+
+export interface Quiz {
+  id:string;
+  subject: string;
+  chapter: string;
+  questions: Question[];
+  pointsPerQuestion: number;
+}
+
 export interface Activity {
   id: string;
   text: string;
-  type: 'goal' | 'competition' | 'project';
+  type: 'goal' | 'competition' | 'project' | 'quiz';
   completed: boolean;
   timestamp: Date;
   points: number;
@@ -18,6 +33,13 @@ export interface Activity {
   // Project specific
   projectSubmissionUrl?: string;
   projectTitle?: string;
+  student_id?: string;
+  // Quiz specific
+  quizDetails?: {
+    quizName: string;
+    score: number;
+    totalQuestions: number;
+  };
 }
 
 export type Role = 'student' | 'admin';
@@ -26,11 +48,12 @@ export interface DailyQuest {
     id: string;
     text: string;
     reward: number;
-    completed: boolean;
+    status: 'unclaimed' | 'pending' | 'completed' | 'rejected';
+    submissionText?: string;
 }
 
 export interface Student {
-  id: string; // Corresponds to Firebase Auth UID
+  id: string; // Corresponds to Supabase Auth UID
   name: string;
   email: string;
   avatar: string;

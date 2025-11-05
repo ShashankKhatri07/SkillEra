@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { mockLearningResources } from '../data/mockData';
 import { ResourceCard } from '../components/ResourceCard';
-// FIX: Import LearningResource type to explicitly type map callback parameters.
 import { Student, LearningResource } from '../types';
 import { InterestSelector } from '../components/InterestSelector';
-import { Page } from '../layouts/MainLayout';
+import { Page } from '../layouts/layoutTypes';
+import { CompassIcon } from '../components/icons/CompassIcon';
 
 interface LearningHubPageProps {
     user: Student;
@@ -49,11 +49,16 @@ export const LearningHubPage = ({ user, onNavigate, onUpdateUser }: LearningHubP
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl sm:text-4xl font-bold">Learning Hub</h1>
-                <p className="text-lg mt-1" style={{color: 'rgba(var(--color-text-main-rgb), 0.7)'}}>
-                    {hasNoInterests ? 'Select your interests to get started.' : 'Explore resources to enhance your skills.'}
-                </p>
+            <div className="flex items-center gap-4">
+                 <div className="p-2 rounded-full flex-shrink-0" style={{backgroundColor: 'rgba(var(--color-primary-rgb),0.1)'}}>
+                    <CompassIcon className="w-10 h-10" style={{color: 'var(--color-primary)'}}/>
+                </div>
+                <div>
+                    <h1 className="text-3xl sm:text-4xl font-bold">Learning Hub</h1>
+                    <p className="text-lg" style={{color: 'rgba(var(--color-text-main-rgb), 0.7)'}}>
+                        {hasNoInterests ? 'Select your interests to get started.' : 'Explore resources to enhance your skills.'}
+                    </p>
+                </div>
             </div>
 
             {hasNoInterests ? (
@@ -73,7 +78,6 @@ export const LearningHubPage = ({ user, onNavigate, onUpdateUser }: LearningHubP
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {/* FIX: Explicitly type 'resource' to fix type inference issue on map. */}
                                 {recommendedResources.map((resource: LearningResource) => (
                                     <ResourceCard key={resource.id} resource={resource} />
                                 ))}
@@ -105,7 +109,6 @@ export const LearningHubPage = ({ user, onNavigate, onUpdateUser }: LearningHubP
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-                            {/* FIX: Explicitly type 'resource' to fix type inference issue on map. */}
                             {filteredResources.map((resource: LearningResource) => (
                                 <ResourceCard key={resource.id} resource={resource} />
                             ))}

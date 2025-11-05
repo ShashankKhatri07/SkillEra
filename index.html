@@ -37,7 +37,7 @@
             --color-accent: #C71585; /* rich pink/magenta */
             --color-accent-secondary: #3CB371; /* rich green */
             
-            background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-bg-main) 100%);
+            background: linear-gradient(135deg, rgba(0, 31, 63, 0.9) 0%, rgba(0, 16, 33, 0.95) 100%);
             color: var(--color-text-main);
         }
         
@@ -53,13 +53,31 @@
             --color-accent: #9B2226; /* Crimson Red */
             --color-accent-secondary: #F56B00; /* Fiery Orange */
             
-            background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-bg-main) 100%);
+            background: linear-gradient(135deg, rgba(42, 33, 26, 0.9) 0%, rgba(28, 22, 17, 0.95) 100%);
             color: var(--color-text-main);
         }
 
         body {
-            background-color: var(--color-bg-main);
             color: var(--color-text-main);
+        }
+
+        body.app-view {
+            background-color: rgba(230, 230, 250, 0.5); /* Semi-transparent lavender */
+            position: relative;
+        }
+
+        body.app-view::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('https://www.apsjodhpur.com/webdata/slider/6bdb8d0d5f3b595d3b341654b2a03f28.png');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            opacity: 0.5;
         }
         
         /* Custom scrollbar for a more polished look */
@@ -156,6 +174,26 @@
             animation: shiny-effect 1.5s infinite;
             animation-delay: 0.5s;
         }
+
+        @keyframes balloon-rise {
+            0% { transform: translateY(110vh) rotate(0); opacity: 0.8; }
+            20% { transform: translateX(-10px) rotate(-5deg); }
+            40% { transform: translateX(10px) rotate(5deg); }
+            60% { transform: translateX(-10px) rotate(-5deg); }
+            80% { transform: translateX(10px) rotate(5deg); }
+            100% { transform: translateY(-20vh) rotate(0); opacity: 0; }
+        }
+
+        @keyframes icon-pop-in {
+            0% { transform: scale(0.3) rotate(-30deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+            70% { transform: scale(0.9) rotate(-5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .animate-icon-pop-in {
+            animation: icon-pop-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+        }
     </style>
     <script type="importmap">
 {
@@ -164,7 +202,8 @@
     "vite": "https://aistudiocdn.com/vite@^7.1.12",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.0"
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
   }
 }
 </script>
