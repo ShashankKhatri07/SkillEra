@@ -1,6 +1,5 @@
 import { supabase } from './supabaseClient';
 import { Student, Event, Project, DailyQuest } from '../types';
-import { FileObject } from '@supabase/supabase-js';
 
 const BUCKET = 'documents';
 const DATA_FOLDER = 'data';
@@ -44,8 +43,8 @@ export async function getAllStudents(): Promise<{ data: Student[] | null, error:
     if (!fileList || fileList.length === 0) return { data: [], error: null };
 
     const studentPromises = fileList
-        .filter((file: FileObject) => file.name.endsWith('.json'))
-        .map((file: FileObject) => downloadJsonFile(`students/${file.name}`));
+        .filter((file) => file.name.endsWith('.json'))
+        .map((file) => downloadJsonFile(`students/${file.name}`));
     
     const studentResults = await Promise.all(studentPromises);
     
