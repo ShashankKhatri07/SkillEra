@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect, useCallback } from 'react';
 import { Student, Role, Message, Event, Appeal, Activity, Project, DailyQuest, Quiz } from './types';
 import { LoginPage } from './pages/LoginPage';
@@ -12,8 +13,6 @@ import { AwaitingVerificationPage } from './pages/AwaitingVerificationPage';
 import { HomePage } from './pages/HomePage';
 import { mockStudents, mockEvents, mockProjects, mockDailyQuests as questTemplates, mockQuizzes } from './data/mockData';
 import { isYesterday, isToday } from './utils/dateUtils';
-import { supabase } from './services/supabaseClient';
-import * as fileStorage from './services/fileStorageService';
 
 type View = 'homepage' | 'role-selection' | 'welcome' | 'login' | 'signup' | 'awaiting-verification';
 
@@ -35,92 +34,24 @@ const rehydrateStudentDates = (student: any): Student => ({
 });
 
 const App = () => {
+  const rehydratedStudents = mockStudents.map(rehydrateStudentDates);
   const [currentUser, setCurrentUser] = useState<Student | null>(null);
-  const [allStudents, setAllStudents] = useState<Student[]>([]);
+  const [allStudents, setAllStudents] = useState<Student[]>(rehydratedStudents);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<Event[]>(mockEvents.map(e => ({...e, date: new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'})})).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
   const [appeals, setAppeals] = useState<Appeal[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [dailyQuests, setDailyQuests] = useState<Omit<DailyQuest, 'status' | 'submissionText'>[]>([]);
+  const [projects, setProjects] = useState<Project[]>(mockProjects);
+  const [dailyQuests, setDailyQuests] = useState<Omit<DailyQuest, 'status' | 'submissionText'>[]>(questTemplates);
   const [quizzes] = useState<Quiz[]>(mockQuizzes);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [authFlow, setAuthFlow] = useState<{ view: View; role: Role | null }>({
     view: 'homepage',
     role: null,
   });
 
-  // Seed storage with mock data if it's empty. This is for demonstration purposes.
-  const seedDatabase = async () => {
-    if (!supabase) return;
-    await fileStorage.checkAndSeedData({
-      students: mockStudents,
-      events: mockEvents,
-      projects: mockProjects,
-      quests: questTemplates
-    });
-  };
-  
-  // Fetch initial data
-  useEffect(() => {
-    if (!supabase) {
-      console.log("Running in offline mode.");
-      // Fallback to mock data if supabase is not configured
-      setAllStudents(JSON.parse(JSON.stringify(mockStudents)).map(rehydrateStudentDates));
-      setEvents(mockEvents);
-      setProjects(mockProjects);
-      setDailyQuests(questTemplates);
-      setIsLoading(false);
-      return;
-    }
 
-    const fetchData = async () => {
-        setIsLoading(true);
-        await seedDatabase();
-
-        const [studentRes, eventRes, projectRes, appealRes, messageRes, questRes] = await Promise.all([
-            fileStorage.getAllStudents(),
-            fileStorage.getCollection<Event>('events'),
-            fileStorage.getCollection<Project>('projects'),
-            fileStorage.getCollection<Appeal>('appeals'),
-            fileStorage.getCollection<Message>('messages'),
-            fileStorage.getCollection<Omit<DailyQuest, 'status' | 'submissionText'>>('quests'),
-        ]);
-
-        if (studentRes.error) console.error("Error fetching students:", studentRes.error.message);
-        else setAllStudents((studentRes.data || []).map(rehydrateStudentDates));
-
-        if (eventRes.error) console.error("Error fetching events:", eventRes.error.message);
-        else setEvents((eventRes.data || []).map(e => ({...e, date: new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'})})).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-        
-        if (projectRes.error) console.error("Error fetching projects:", projectRes.error.message);
-        else setProjects(projectRes.data || []);
-
-        if (appealRes.error) console.error("Error fetching appeals:", appealRes.error.message);
-        else setAppeals((appealRes.data || []).map(a => ({...a, timestamp: new Date(a.timestamp)})).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()));
-        
-        if (messageRes.error) console.error("Error fetching messages:", messageRes.error.message);
-        else setMessages((messageRes.data || []).map(m => ({...m, timestamp: new Date(m.timestamp)})).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()));
-        
-        if (questRes.error) console.error("Error fetching quests:", questRes.error.message);
-        else setDailyQuests(questRes.data || []);
-
-        setIsLoading(false);
-    };
-
-    fetchData();
-  }, []);
-
-
-  const syncCurrentUser = useCallback(async (user: Student) => {
-    if (supabase) {
-        const { error } = await fileStorage.saveStudent(user);
-        if (error) {
-            console.error("Failed to update user in Storage", error);
-            // Optionally: alert the user that the change could not be saved
-            return;
-        }
-    }
+  const syncCurrentUser = useCallback((user: Student) => {
     setCurrentUser(user);
     setAllStudents(prev => prev.map(s => s.id === user.id ? user : s));
   }, []);
@@ -165,7 +96,7 @@ const App = () => {
                     dailyQuest: newQuestTemplate ? { id: newQuestTemplate.id, text: newQuestTemplate.text, reward: newQuestTemplate.reward, status: 'unclaimed' } : undefined
                 };
             }
-            await syncCurrentUser(updatedUser);
+            syncCurrentUser(updatedUser);
             return 'success';
         } else {
             return 'wrong-role';
@@ -201,14 +132,6 @@ const App = () => {
           dailyQuest: newQuestTemplate ? { id: newQuestTemplate.id, text: newQuestTemplate.text, reward: newQuestTemplate.reward, status: 'unclaimed' } : undefined
       };
       
-      if (supabase) {
-        const { error } = await fileStorage.saveStudent(newUser);
-        if (error) {
-            console.error('Signup error:', error);
-            return 'email-in-use'; // Generic error
-        }
-      }
-
       setAllStudents(prev => [...prev, newUser]);
       setCurrentUser(newUser);
       return 'success';
@@ -219,23 +142,16 @@ const App = () => {
     setAuthFlow({ view: 'homepage', role: null });
   };
   
-  const handleUpdateUser = async (updatedUser: Student) => {
-    await syncCurrentUser(updatedUser);
+  const handleUpdateUser = (updatedUser: Student) => {
+    syncCurrentUser(updatedUser);
   };
   
-  const handleUpdateStudentById = async (studentId: string, updatedStudentData: Partial<Student>) => {
+  const handleUpdateStudentById = (studentId: string, updatedStudentData: Partial<Student>) => {
       const studentToUpdate = allStudents.find(s => s.id === studentId);
       if (!studentToUpdate) return;
       
       const finalUpdatedStudent = { ...studentToUpdate, ...updatedStudentData };
 
-      if (supabase) {
-        const { error } = await fileStorage.saveStudent(finalUpdatedStudent);
-        if (error) {
-            console.error("Error updating student by ID:", error);
-            return;
-        }
-      }
       setAllStudents(prev => prev.map(s => s.id === studentId ? finalUpdatedStudent : s));
   };
   
@@ -247,7 +163,7 @@ const App = () => {
     return Promise.resolve('success');
   };
   
-  const handleSendMessage = async (receiverId: string, text: string) => {
+  const handleSendMessage = (receiverId: string, text: string) => {
     if (!currentUser) return;
     const newMessage: Message = {
         id: `msg-${Date.now()}`,
@@ -256,168 +172,81 @@ const App = () => {
         text,
         timestamp: new Date()
     };
-    if (supabase) {
-        const { error } = await fileStorage.addItemToCollection('messages', newMessage);
-        if (error) {
-            console.error("Error sending message:", error);
-            return;
-        }
-    }
-    setMessages(prev => [...prev, newMessage]);
+    setMessages(prev => [...prev, newMessage].sort((a,b) => a.timestamp.getTime() - b.timestamp.getTime()));
   };
 
-  const handleAddEvent = async (event: Omit<Event, 'id'>) => {
+  const handleAddEvent = (event: Omit<Event, 'id'>) => {
     const newEvent: Event = { ...event, id: `event-${Date.now()}` };
-    if (supabase) {
-        const { error } = await fileStorage.addItemToCollection('events', newEvent);
-        if (error) {
-             console.error("Error adding event:", error);
-             return;
-        }
-    }
     setEvents(prev => [newEvent, ...prev].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
   };
 
-  const handleUpdateEvent = async (updatedEvent: Event) => {
-    if (supabase) {
-        const { error } = await fileStorage.updateCollection('events', updatedEvent);
-        if (error) {
-            console.error("Error updating event:", error);
-            return;
-        }
-    }
+  const handleUpdateEvent = (updatedEvent: Event) => {
     setEvents(prev => prev.map(e => e.id === updatedEvent.id ? updatedEvent : e));
   };
 
-  const handleDeleteEvent = async (eventId: string) => {
-    if (supabase) {
-        const { error } = await fileStorage.deleteItemFromCollection('events', eventId);
-        if (error) {
-            console.error("Error deleting event:", error);
-            return;
-        }
-    }
+  const handleDeleteEvent = (eventId: string) => {
     setEvents(prev => prev.filter(e => e.id !== eventId));
   };
 
-  const handleAddProject = async (project: Omit<Project, 'id' | 'members'>) => {
+  const handleAddProject = (project: Omit<Project, 'id' | 'members'>) => {
     const newProject: Project = { ...project, id: `proj-${Date.now()}`, members: [] };
-    if (supabase) {
-        const { error } = await fileStorage.addItemToCollection('projects', newProject);
-        if (error) {
-            console.error("Error adding project:", error);
-            return;
-        }
-    }
     setProjects(prev => [newProject, ...prev]);
   };
 
-  const handleUpdateProject = async (updatedProject: Project) => {
-    if (supabase) {
-        const { error } = await fileStorage.updateCollection('projects', updatedProject);
-        if (error) {
-            console.error("Error updating project:", error);
-            return;
-        }
-    }
+  const handleUpdateProject = (updatedProject: Project) => {
     setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
   };
   
-  const handleDeleteProject = async (projectId: string) => {
-    if (supabase) {
-        const { error } = await fileStorage.deleteItemFromCollection('projects', projectId);
-        if (error) {
-            console.error("Error deleting project:", error);
-            return;
-        }
-    }
+  const handleDeleteProject = (projectId: string) => {
     setProjects(prev => prev.filter(p => p.id !== projectId));
   };
 
-  const handleAddQuest = async (quest: Omit<DailyQuest, 'id' | 'status' | 'submissionText'>) => {
+  const handleAddQuest = (quest: Omit<DailyQuest, 'id' | 'status' | 'submissionText'>) => {
     const newQuest = { ...quest, id: `quest-${Date.now()}`};
-    if (supabase) {
-        const { error } = await fileStorage.addItemToCollection('quests', newQuest);
-        if (error) {
-            console.error("Error adding quest:", error);
-            return;
-        }
-    }
     setDailyQuests(prev => [newQuest, ...prev]);
   };
 
-  const handleUpdateQuest = async (updatedQuest: Omit<DailyQuest, 'status' | 'submissionText'>) => {
-    if (supabase) {
-        const { error } = await fileStorage.updateCollection('quests', updatedQuest);
-        if (error) {
-            console.error("Error updating quest:", error);
-            return;
-        }
-    }
+  const handleUpdateQuest = (updatedQuest: Omit<DailyQuest, 'status' | 'submissionText'>) => {
     setDailyQuests(prev => prev.map(q => q.id === updatedQuest.id ? updatedQuest : q));
   };
   
-  const handleDeleteQuest = async (questId: string) => {
-     if (supabase) {
-        const { error } = await fileStorage.deleteItemFromCollection('quests', questId);
-        if (error) {
-            console.error("Error deleting quest:", error);
-            return;
-        }
-    }
+  const handleDeleteQuest = (questId: string) => {
     setDailyQuests(prev => prev.filter(q => q.id !== questId));
   };
 
-  const handleResolveAppeal = async (appealId: string, status: 'approved' | 'rejected', newPercentage?: number) => {
+  const handleResolveAppeal = (appealId: string, status: 'approved' | 'rejected', newPercentage?: number) => {
       const appeal = appeals.find(a => a.id === appealId);
       if (!appeal) return;
 
       const updatedAppeal = { ...appeal, status };
-      if (supabase) {
-          const { error } = await fileStorage.updateCollection('appeals', updatedAppeal);
-          if (error) {
-            console.error("Error resolving appeal:", error);
-            return;
-          }
-      }
-
+      
       if (status === 'approved' && newPercentage !== undefined) {
-          await handleUpdateStudentById(appeal.studentId, { academicPercentage: newPercentage });
+          handleUpdateStudentById(appeal.studentId, { academicPercentage: newPercentage });
       }
 
       setAppeals(prev => prev.map(a => a.id === appealId ? updatedAppeal : a));
   };
   
-  const handleCreateAppeal = async (claimedPercentage: number, reason: string, answerSheetFile: File) => {
-    if (!currentUser || currentUser.role !== 'student' || !supabase) return;
+  const handleCreateAppeal = (claimedPercentage: number, reason: string, answerSheetFile: File) => {
+    if (!currentUser || currentUser.role !== 'student') return;
     
-    // 1. Upload file
-    const fileName = `appeals/${currentUser.id}/${Date.now()}-${answerSheetFile.name}`;
-    const { error: uploadError } = await supabase.storage.from('documents').upload(fileName, answerSheetFile);
-    if (uploadError) { console.error('Appeal document upload error:', uploadError); return; }
+    const answerSheetUrl = URL.createObjectURL(answerSheetFile);
 
-    // 2. Get public URL
-    const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(fileName);
-
-    // 3. Create appeal record
     const newAppeal: Appeal = {
         id: `appeal-${Date.now()}`,
         studentId: currentUser.id,
         studentName: currentUser.name,
         claimedPercentage,
         reason,
-        answerSheetUrl: publicUrl,
+        answerSheetUrl,
         status: 'pending',
         timestamp: new Date()
     };
     
-    const { error: insertError } = await fileStorage.addItemToCollection('appeals', newAppeal);
-    if (insertError) { console.error("Error creating appeal:", insertError); return; }
-
-    setAppeals(prev => [newAppeal, ...prev]);
+    setAppeals(prev => [newAppeal, ...prev].sort((a,b) => b.timestamp.getTime() - a.timestamp.getTime()));
   };
 
-  const handleResolveSubmission = async (studentId: string, activityId: string, status: 'approved' | 'rejected') => {
+  const handleResolveSubmission = (studentId: string, activityId: string, status: 'approved' | 'rejected') => {
     const student = allStudents.find(s => s.id === studentId);
     if (!student) return;
 
@@ -433,10 +262,10 @@ const App = () => {
     
     const updatedActivities = student.activities.map(a => a.id === activityId ? {...a, status, completed: status === 'approved'} : a);
     
-    await handleUpdateStudentById(studentId, { points: pointsUpdate, activities: updatedActivities });
+    handleUpdateStudentById(studentId, { points: pointsUpdate, activities: updatedActivities });
   };
 
-  const handleSubmitQuest = async (submissionText: string) => {
+  const handleSubmitQuest = (submissionText: string) => {
     if (currentUser && currentUser.dailyQuest && currentUser.dailyQuest.status === 'unclaimed') {
         const updatedUser = {
             ...currentUser,
@@ -446,18 +275,18 @@ const App = () => {
                 submissionText: submissionText,
             }
         };
-        await syncCurrentUser(updatedUser);
+        syncCurrentUser(updatedUser);
     }
   };
   
-  const handleResolveQuest = async (studentId: string, status: 'approved' | 'rejected') => {
+  const handleResolveQuest = (studentId: string, status: 'approved' | 'rejected') => {
       const student = allStudents.find(s => s.id === studentId);
       if (student && student.dailyQuest?.status === 'pending') {
           const questReward = student.dailyQuest.reward;
           const newPoints = status === 'approved' ? student.points + questReward : student.points;
           const newStatus = status === 'approved' ? 'completed' as const : 'rejected' as const;
           
-          await handleUpdateStudentById(studentId, {
+          handleUpdateStudentById(studentId, {
               points: newPoints,
               dailyQuest: {
                   ...student.dailyQuest,
@@ -467,34 +296,20 @@ const App = () => {
       }
   };
 
-  const handleJoinProject = async (projectId: string) => {
+  const handleJoinProject = (projectId: string) => {
       if (!currentUser) return;
       const project = projects.find(p => p.id === projectId);
       if (!project || project.members.includes(currentUser.id)) return;
 
       const updatedProject = { ...project, members: [...project.members, currentUser.id] };
-      
-      if (supabase) {
-        const { error } = await fileStorage.updateCollection('projects', updatedProject);
-        if (error) {
-            console.error("Error joining project:", error);
-            return;
-        }
-      }
       setProjects(prev => prev.map(p => p.id === projectId ? updatedProject : p));
   };
 
-  const handleSubmitProject = async (projectId: string, submissionFile: File) => {
+  const handleSubmitProject = (projectId: string, submissionFile: File) => {
       const project = projects.find(p => p.id === projectId);
-      if (!project || !currentUser || !supabase) return;
+      if (!project || !currentUser) return;
 
-      // 1. Upload file
-      const fileName = `projects/${currentUser.id}/${projectId}-${submissionFile.name}`;
-      const { error: uploadError } = await supabase.storage.from('documents').upload(fileName, submissionFile);
-      if (uploadError) { console.error('Project submission upload error:', uploadError); return; }
-
-      // 2. Get public URL
-      const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(fileName);
+      const publicUrl = URL.createObjectURL(submissionFile);
       
       const newActivity: Activity = {
           id: `proj-act-${Date.now()}`,
@@ -513,10 +328,10 @@ const App = () => {
           ...currentUser,
           activities: [newActivity, ...currentUser.activities]
       };
-      await syncCurrentUser(updatedUser);
+      syncCurrentUser(updatedUser);
   };
 
-  const handleCompleteQuiz = async (quizId: string, score: number, totalQuestions: number) => {
+  const handleCompleteQuiz = (quizId: string, score: number, totalQuestions: number) => {
     if (!currentUser) return;
 
     const quiz = quizzes.find(q => q.id === quizId);
@@ -545,7 +360,7 @@ const App = () => {
         activities: [newActivity, ...currentUser.activities],
     };
 
-    await syncCurrentUser(updatedUser);
+    syncCurrentUser(updatedUser);
   };
 
   const renderContent = () => {
@@ -556,7 +371,7 @@ const App = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <p className="font-semibold">Connecting to SkillEra Cloud...</p>
+                <p className="font-semibold">Loading SkillEra...</p>
             </div>
         );
       }

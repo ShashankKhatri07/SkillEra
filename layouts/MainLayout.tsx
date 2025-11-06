@@ -21,13 +21,12 @@ import { ProjectsPage } from '../pages/ProjectsPage';
 import { MentorshipPage } from '../pages/MentorshipPage';
 import { Page } from './layoutTypes';
 import { QuizPage } from '../pages/QuizPage';
-import { supabase } from '../services/supabaseClient';
 
 interface MainLayoutProps {
     user: Student;
     allStudents: Student[];
     projects: Project[];
-    onUpdateUser: (user: Student) => Promise<void>;
+    onUpdateUser: (user: Student) => void;
     onUpdatePassword: (currentPassword: string, newPassword: string) => Promise<'success' | 'incorrect-password'>;
     onLogout: () => void;
     messages: Message[];
@@ -99,25 +98,8 @@ export const MainLayout = (props: MainLayoutProps) => {
     });
   };
   
-  const logCompetition = async (level: CompetitionLevel, result: CompetitionResult, points: number, certificateFile: File) => {
-    if (!supabase) {
-      alert("Database not connected. Cannot upload file.");
-      setIsLogCompetitionModalOpen(false);
-      return;
-    }
-
-    // 1. Upload file to Supabase Storage
-    const fileName = `certificates/${user.id}/${Date.now()}-${certificateFile.name}`;
-    const { error: uploadError } = await supabase.storage.from('documents').upload(fileName, certificateFile);
-
-    if (uploadError) {
-        console.error('Error uploading certificate:', uploadError);
-        alert('Failed to upload certificate. Please try again.');
-        return;
-    }
-
-    // 2. Get public URL
-    const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(fileName);
+  const logCompetition = (level: CompetitionLevel, result: CompetitionResult, points: number, certificateFile: File) => {
+    const certificateUrl = URL.createObjectURL(certificateFile);
 
     const newCompetition: Activity = {
         id: Date.now().toString(), text: `${result === 'won' ? 'Won' : 'Participated in'} a ${level} competition`,
@@ -127,10 +109,10 @@ export const MainLayout = (props: MainLayoutProps) => {
         points,
         competitionLevel: level,
         result: result,
-        certificateUrl: publicUrl,
+        certificateUrl: certificateUrl,
         status: 'pending',
     };
-    await onUpdateUser({
+    onUpdateUser({
         ...user,
         activities: [newCompetition, ...user.activities],
     });
