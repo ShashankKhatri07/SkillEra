@@ -1,11 +1,12 @@
 
+
 import React, { useState } from 'react';
 import { Role } from '../types';
 import { ApsBrand } from '../components/ApsBrand';
 
 interface LoginPageProps {
   role: Role;
-  onLogin: (identifier: string) => Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'>;
+  onLogin: (identifier: string, password: string) => Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'>;
   onSwitchToSignUp: () => void;
   onBack: () => void;
 }
@@ -18,7 +19,7 @@ export const LoginPage = ({ role, onLogin, onSwitchToSignUp, onBack }: LoginPage
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const result = await onLogin(identifier);
+    const result = await onLogin(identifier, password);
     if (result === 'not-found' || result === 'wrong-password') {
       const fieldName = role === 'student' ? 'admission number' : 'email';
       setError(`Invalid ${fieldName} or password.`);

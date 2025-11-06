@@ -1,6 +1,7 @@
 
 
 
+
 import { useState, useEffect, useCallback } from 'react';
 import { Student, Role, Message, Event, Appeal, Activity, Project, DailyQuest, Quiz } from './types';
 import { LoginPage } from './pages/LoginPage';
@@ -71,11 +72,16 @@ const App = () => {
     }
   }, [currentUser, authFlow.view]);
   
-  const handleLogin = async (identifier: string): Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'> => {
+  const handleLogin = async (identifier: string, password: string): Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'> => {
     const email = authFlow.role === 'student' ? `${identifier}@apsjodhpur.com` : identifier;
     const user = allStudents.find(u => u.email === email);
     
     if (user) {
+        // Mock password check for all users
+        if (password !== 'password123') {
+            return 'wrong-password';
+        }
+
         if (user.email === 'principal@test.com' || user.role === authFlow.role) {
             const today = new Date();
             const lastLogin = user.lastLoginDate ? new Date(user.lastLoginDate) : null;
@@ -156,10 +162,11 @@ const App = () => {
   };
   
   const handleUpdatePassword = async (currentPassword: string, newPassword: string): Promise<'success' | 'incorrect-password'> => {
-    console.log("Password update attempt:", { currentPassword, newPassword });
-    if (currentPassword === 'wrong') {
+    // Mock password validation
+    if (currentPassword !== 'password123') {
         return Promise.resolve('incorrect-password');
     }
+    console.log("Password updated successfully to:", newPassword);
     return Promise.resolve('success');
   };
   
@@ -305,11 +312,9 @@ const App = () => {
       setProjects(prev => prev.map(p => p.id === projectId ? updatedProject : p));
   };
 
-  const handleSubmitProject = (projectId: string, submissionFile: File) => {
+  const handleSubmitProject = (projectId: string, submissionBase64: string) => {
       const project = projects.find(p => p.id === projectId);
       if (!project || !currentUser) return;
-
-      const publicUrl = URL.createObjectURL(submissionFile);
       
       const newActivity: Activity = {
           id: `proj-act-${Date.now()}`,
@@ -318,7 +323,7 @@ const App = () => {
           completed: false,
           timestamp: new Date(),
           points: project.points,
-          projectSubmissionUrl: publicUrl,
+          projectSubmissionUrl: submissionBase64,
           projectTitle: project.title,
           status: 'pending',
           student_id: currentUser.id,

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Project } from '../types';
 import { ProjectIcon } from './icons/ProjectIcon';
+import { fileToBase64 } from '../utils/fileUtils';
 
 interface SubmitProjectModalProps {
     project: Project;
     onClose: () => void;
-    onSubmit: (submissionFile: File) => void;
+    onSubmit: (submissionBase64: string) => void;
 }
 
 export const SubmitProjectModal = ({ project, onClose, onSubmit }: SubmitProjectModalProps) => {
@@ -26,13 +27,14 @@ export const SubmitProjectModal = ({ project, onClose, onSubmit }: SubmitProject
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!submissionFile) {
             setFileError('A submission file is required.');
             return;
         }
-        onSubmit(submissionFile);
+        const submissionBase64 = await fileToBase64(submissionFile);
+        onSubmit(submissionBase64);
     };
 
     return (

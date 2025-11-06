@@ -35,7 +35,7 @@ interface MainLayoutProps {
     onCreateAppeal: (claimedPercentage: number, reason: string, answerSheetFile: File) => void;
     onSubmitQuest: (submissionText: string) => void;
     onJoinProject: (projectId: string) => void;
-    onSubmitProject: (projectId: string, submissionFile: File) => void;
+    onSubmitProject: (projectId: string, submissionBase64: string) => void;
     quizzes: Quiz[];
     onCompleteQuiz: (quizId: string, score: number, totalQuestions: number) => void;
 }
@@ -98,9 +98,7 @@ export const MainLayout = (props: MainLayoutProps) => {
     });
   };
   
-  const logCompetition = (level: CompetitionLevel, result: CompetitionResult, points: number, certificateFile: File) => {
-    const certificateUrl = URL.createObjectURL(certificateFile);
-
+  const logCompetition = (level: CompetitionLevel, result: CompetitionResult, points: number, certificateBase64: string) => {
     const newCompetition: Activity = {
         id: Date.now().toString(), text: `${result === 'won' ? 'Won' : 'Participated in'} a ${level} competition`,
         type: 'competition',
@@ -109,7 +107,7 @@ export const MainLayout = (props: MainLayoutProps) => {
         points,
         competitionLevel: level,
         result: result,
-        certificateUrl: certificateUrl,
+        certificateUrl: certificateBase64,
         status: 'pending',
     };
     onUpdateUser({

@@ -2,11 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { CompetitionLevel, CompetitionResult } from '../types';
 import { PodiumIcon } from './icons/PodiumIcon';
 import { CertificateIcon } from './icons/CertificateIcon';
+import { fileToBase64 } from '../utils/fileUtils';
 
 
 interface LogCompetitionModalProps {
   onClose: () => void;
-  onSubmit: (level: CompetitionLevel, result: CompetitionResult, points: number, certificateFile: File) => void;
+  onSubmit: (level: CompetitionLevel, result: CompetitionResult, points: number, certificateBase64: string) => void;
 }
 
 const competitionLevels: CompetitionLevel[] = ['interhouse', 'cluster', 'district', 'state', 'national', 'international'];
@@ -53,7 +54,8 @@ export const LogCompetitionModal = ({ onClose, onSubmit }: LogCompetitionModalPr
             setFileError('A certificate upload is required.');
             return;
         }
-        onSubmit(level, result, points, certificateFile);
+        const certificateBase64 = await fileToBase64(certificateFile);
+        onSubmit(level, result, points, certificateBase64);
     };
 
     return (
