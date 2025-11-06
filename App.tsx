@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Student, Role, Message, Event, Appeal, Activity, Project, DailyQuest, Quiz } from './types';
 import { LoginPage } from './pages/LoginPage';
@@ -12,6 +13,7 @@ import { HomePage } from './pages/HomePage';
 import { mockStudents, mockEvents, mockProjects, mockDailyQuests as questTemplates, mockQuizzes } from './data/mockData';
 import { isYesterday, isToday } from './utils/dateUtils';
 import { supabase } from './services/supabaseClient';
+import * as fileStorage from './services/fileStorageService';
 
 type View = 'homepage' | 'role-selection' | 'welcome' | 'login' | 'signup' | 'awaiting-verification';
 
@@ -48,40 +50,18 @@ const App = () => {
     role: null,
   });
 
-  // Seed database with mock data if it's empty. This is for demonstration purposes.
+  // Seed storage with mock data if it's empty. This is for demonstration purposes.
   const seedDatabase = async () => {
     if (!supabase) return;
-
-    try {
-        const { count: studentCount } = await supabase.from('students').select('*', { count: 'exact', head: true });
-        if (studentCount === 0) {
-            console.log('Seeding students...');
-            await supabase.from('students').insert(mockStudents);
-        }
-
-        const { count: eventCount } = await supabase.from('events').select('*', { count: 'exact', head: true });
-        if (eventCount === 0) {
-            console.log('Seeding events...');
-            await supabase.from('events').insert(mockEvents);
-        }
-
-        const { count: projectCount } = await supabase.from('projects').select('*', { count: 'exact', head: true });
-        if (projectCount === 0) {
-            console.log('Seeding projects...');
-            await supabase.from('projects').insert(mockProjects);
-        }
-        
-        const { count: questCount } = await supabase.from('quests').select('*', { count: 'exact', head: true });
-        if (questCount === 0) {
-            console.log('Seeding quests...');
-            await supabase.from('quests').insert(questTemplates);
-        }
-    } catch (e) {
-        console.error("Error during seeding:", e);
-    }
+    await fileStorage.checkAndSeedData({
+      students: mockStudents,
+      events: mockEvents,
+      projects: mockProjects,
+      quests: questTemplates
+    });
   };
   
-  // Fetch initial data from Supabase
+  // Fetch initial data
   useEffect(() => {
     if (!supabase) {
       console.log("Running in offline mode.");
@@ -99,31 +79,31 @@ const App = () => {
         await seedDatabase();
 
         const [studentRes, eventRes, projectRes, appealRes, messageRes, questRes] = await Promise.all([
-            supabase.from('students').select('*'),
-            supabase.from('events').select('*').order('date', { ascending: false }),
-            supabase.from('projects').select('*'),
-            supabase.from('appeals').select('*').order('timestamp', { ascending: false }),
-            supabase.from('messages').select('*').order('timestamp'),
-            supabase.from('quests').select('*'),
+            fileStorage.getAllStudents(),
+            fileStorage.getCollection<Event>('events'),
+            fileStorage.getCollection<Project>('projects'),
+            fileStorage.getCollection<Appeal>('appeals'),
+            fileStorage.getCollection<Message>('messages'),
+            fileStorage.getCollection<Omit<DailyQuest, 'status' | 'submissionText'>>('quests'),
         ]);
 
         if (studentRes.error) console.error("Error fetching students:", studentRes.error.message);
-        else setAllStudents(studentRes.data.map(rehydrateStudentDates));
+        else setAllStudents((studentRes.data || []).map(rehydrateStudentDates));
 
         if (eventRes.error) console.error("Error fetching events:", eventRes.error.message);
-        else setEvents(eventRes.data.map(e => ({...e, date: new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'})})));
+        else setEvents((eventRes.data || []).map(e => ({...e, date: new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'})})).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
         
         if (projectRes.error) console.error("Error fetching projects:", projectRes.error.message);
-        else setProjects(projectRes.data);
+        else setProjects(projectRes.data || []);
 
         if (appealRes.error) console.error("Error fetching appeals:", appealRes.error.message);
-        else setAppeals(appealRes.data.map(a => ({...a, timestamp: new Date(a.timestamp)})));
+        else setAppeals((appealRes.data || []).map(a => ({...a, timestamp: new Date(a.timestamp)})).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()));
         
         if (messageRes.error) console.error("Error fetching messages:", messageRes.error.message);
-        else setMessages(messageRes.data.map(m => ({...m, timestamp: new Date(m.timestamp)})));
+        else setMessages((messageRes.data || []).map(m => ({...m, timestamp: new Date(m.timestamp)})).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()));
         
         if (questRes.error) console.error("Error fetching quests:", questRes.error.message);
-        else setDailyQuests(questRes.data);
+        else setDailyQuests(questRes.data || []);
 
         setIsLoading(false);
     };
@@ -133,13 +113,16 @@ const App = () => {
 
 
   const syncCurrentUser = useCallback(async (user: Student) => {
+    if (supabase) {
+        const { error } = await fileStorage.saveStudent(user);
+        if (error) {
+            console.error("Failed to update user in Storage", error);
+            // Optionally: alert the user that the change could not be saved
+            return;
+        }
+    }
     setCurrentUser(user);
     setAllStudents(prev => prev.map(s => s.id === user.id ? user : s));
-    
-    if (supabase) {
-        const { error } = await supabase.from('students').update(user).eq('id', user.id);
-        if (error) console.error("Failed to update user in Supabase", error);
-    }
   }, []);
 
   useEffect(() => {
@@ -157,7 +140,8 @@ const App = () => {
     }
   }, [currentUser, authFlow.view]);
   
-  const handleLogin = async (email: string): Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'> => {
+  const handleLogin = async (identifier: string): Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'> => {
+    const email = authFlow.role === 'student' ? `${identifier}@apsjodhpur.com` : identifier;
     const user = allStudents.find(u => u.email === email);
     
     if (user) {
@@ -190,7 +174,8 @@ const App = () => {
     return 'not-found';
   };
 
-  const handleSignUp = async (name: string, email: string, studentClass: string, section: string, admissionNumber: string): Promise<'success' | 'email-in-use'> => {
+  const handleSignUp = async (name: string, studentClass: string, section: string, admissionNumber: string): Promise<'success' | 'email-in-use'> => {
+      const email = `${admissionNumber}@apsjodhpur.com`;
       if (allStudents.some(u => u.email === email)) {
           return 'email-in-use';
       }
@@ -217,7 +202,7 @@ const App = () => {
       };
       
       if (supabase) {
-        const { error } = await supabase.from('students').insert(newUser);
+        const { error } = await fileStorage.saveStudent(newUser);
         if (error) {
             console.error('Signup error:', error);
             return 'email-in-use'; // Generic error
@@ -239,11 +224,19 @@ const App = () => {
   };
   
   const handleUpdateStudentById = async (studentId: string, updatedStudentData: Partial<Student>) => {
-      setAllStudents(prev => prev.map(s => s.id === studentId ? { ...s, ...updatedStudentData } : s));
+      const studentToUpdate = allStudents.find(s => s.id === studentId);
+      if (!studentToUpdate) return;
+      
+      const finalUpdatedStudent = { ...studentToUpdate, ...updatedStudentData };
+
       if (supabase) {
-        const { error } = await supabase.from('students').update(updatedStudentData).eq('id', studentId);
-        if (error) console.error("Error updating student by ID:", error);
+        const { error } = await fileStorage.saveStudent(finalUpdatedStudent);
+        if (error) {
+            console.error("Error updating student by ID:", error);
+            return;
+        }
       }
+      setAllStudents(prev => prev.map(s => s.id === studentId ? finalUpdatedStudent : s));
   };
   
   const handleUpdatePassword = async (currentPassword: string, newPassword: string): Promise<'success' | 'incorrect-password'> => {
@@ -264,8 +257,11 @@ const App = () => {
         timestamp: new Date()
     };
     if (supabase) {
-        const { error } = await supabase.from('messages').insert(newMessage);
-        if (error) console.error("Error sending message:", error);
+        const { error } = await fileStorage.addItemToCollection('messages', newMessage);
+        if (error) {
+            console.error("Error sending message:", error);
+            return;
+        }
     }
     setMessages(prev => [...prev, newMessage]);
   };
@@ -273,76 +269,103 @@ const App = () => {
   const handleAddEvent = async (event: Omit<Event, 'id'>) => {
     const newEvent: Event = { ...event, id: `event-${Date.now()}` };
     if (supabase) {
-        const { error } = await supabase.from('events').insert(newEvent);
-        if (error) console.error("Error adding event:", error);
+        const { error } = await fileStorage.addItemToCollection('events', newEvent);
+        if (error) {
+             console.error("Error adding event:", error);
+             return;
+        }
     }
     setEvents(prev => [newEvent, ...prev].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
   };
 
   const handleUpdateEvent = async (updatedEvent: Event) => {
-    setEvents(prev => prev.map(e => e.id === updatedEvent.id ? updatedEvent : e));
     if (supabase) {
-        const { error } = await supabase.from('events').update(updatedEvent).eq('id', updatedEvent.id);
-        if (error) console.error("Error updating event:", error);
+        const { error } = await fileStorage.updateCollection('events', updatedEvent);
+        if (error) {
+            console.error("Error updating event:", error);
+            return;
+        }
     }
+    setEvents(prev => prev.map(e => e.id === updatedEvent.id ? updatedEvent : e));
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    setEvents(prev => prev.filter(e => e.id !== eventId));
     if (supabase) {
-        const { error } = await supabase.from('events').delete().eq('id', eventId);
-        if (error) console.error("Error deleting event:", error);
+        const { error } = await fileStorage.deleteItemFromCollection('events', eventId);
+        if (error) {
+            console.error("Error deleting event:", error);
+            return;
+        }
     }
+    setEvents(prev => prev.filter(e => e.id !== eventId));
   };
 
   const handleAddProject = async (project: Omit<Project, 'id' | 'members'>) => {
     const newProject: Project = { ...project, id: `proj-${Date.now()}`, members: [] };
     if (supabase) {
-        const { error } = await supabase.from('projects').insert(newProject);
-        if (error) console.error("Error adding project:", error);
+        const { error } = await fileStorage.addItemToCollection('projects', newProject);
+        if (error) {
+            console.error("Error adding project:", error);
+            return;
+        }
     }
     setProjects(prev => [newProject, ...prev]);
   };
 
   const handleUpdateProject = async (updatedProject: Project) => {
-    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
     if (supabase) {
-        const { error } = await supabase.from('projects').update(updatedProject).eq('id', updatedProject.id);
-        if (error) console.error("Error updating project:", error);
+        const { error } = await fileStorage.updateCollection('projects', updatedProject);
+        if (error) {
+            console.error("Error updating project:", error);
+            return;
+        }
     }
+    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
   };
   
   const handleDeleteProject = async (projectId: string) => {
-    setProjects(prev => prev.filter(p => p.id !== projectId));
     if (supabase) {
-        const { error } = await supabase.from('projects').delete().eq('id', projectId);
-        if (error) console.error("Error deleting project:", error);
+        const { error } = await fileStorage.deleteItemFromCollection('projects', projectId);
+        if (error) {
+            console.error("Error deleting project:", error);
+            return;
+        }
     }
+    setProjects(prev => prev.filter(p => p.id !== projectId));
   };
 
   const handleAddQuest = async (quest: Omit<DailyQuest, 'id' | 'status' | 'submissionText'>) => {
     const newQuest = { ...quest, id: `quest-${Date.now()}`};
     if (supabase) {
-        const { error } = await supabase.from('quests').insert(newQuest);
-        if (error) console.error("Error adding quest:", error);
+        const { error } = await fileStorage.addItemToCollection('quests', newQuest);
+        if (error) {
+            console.error("Error adding quest:", error);
+            return;
+        }
     }
     setDailyQuests(prev => [newQuest, ...prev]);
   };
 
   const handleUpdateQuest = async (updatedQuest: Omit<DailyQuest, 'status' | 'submissionText'>) => {
-    setDailyQuests(prev => prev.map(q => q.id === updatedQuest.id ? updatedQuest : q));
     if (supabase) {
-        const { error } = await supabase.from('quests').update(updatedQuest).eq('id', updatedQuest.id);
-        if (error) console.error("Error updating quest:", error);
+        const { error } = await fileStorage.updateCollection('quests', updatedQuest);
+        if (error) {
+            console.error("Error updating quest:", error);
+            return;
+        }
     }
+    setDailyQuests(prev => prev.map(q => q.id === updatedQuest.id ? updatedQuest : q));
   };
   
   const handleDeleteQuest = async (questId: string) => {
-    setDailyQuests(prev => prev.filter(q => q.id !== questId));
      if (supabase) {
-        const { error } = await supabase.from('quests').delete().eq('id', questId);
-        if (error) console.error("Error deleting quest:", error);
+        const { error } = await fileStorage.deleteItemFromCollection('quests', questId);
+        if (error) {
+            console.error("Error deleting quest:", error);
+            return;
+        }
     }
+    setDailyQuests(prev => prev.filter(q => q.id !== questId));
   };
 
   const handleResolveAppeal = async (appealId: string, status: 'approved' | 'rejected', newPercentage?: number) => {
@@ -350,15 +373,19 @@ const App = () => {
       if (!appeal) return;
 
       const updatedAppeal = { ...appeal, status };
-      setAppeals(prev => prev.map(a => a.id === appealId ? updatedAppeal : a));
       if (supabase) {
-          const { error } = await supabase.from('appeals').update({ status }).eq('id', appealId);
-          if (error) console.error("Error resolving appeal:", error);
+          const { error } = await fileStorage.updateCollection('appeals', updatedAppeal);
+          if (error) {
+            console.error("Error resolving appeal:", error);
+            return;
+          }
       }
 
       if (status === 'approved' && newPercentage !== undefined) {
           await handleUpdateStudentById(appeal.studentId, { academicPercentage: newPercentage });
       }
+
+      setAppeals(prev => prev.map(a => a.id === appealId ? updatedAppeal : a));
   };
   
   const handleCreateAppeal = async (claimedPercentage: number, reason: string, answerSheetFile: File) => {
@@ -384,7 +411,7 @@ const App = () => {
         timestamp: new Date()
     };
     
-    const { error: insertError } = await supabase.from('appeals').insert(newAppeal);
+    const { error: insertError } = await fileStorage.addItemToCollection('appeals', newAppeal);
     if (insertError) { console.error("Error creating appeal:", insertError); return; }
 
     setAppeals(prev => [newAppeal, ...prev]);
@@ -445,13 +472,16 @@ const App = () => {
       const project = projects.find(p => p.id === projectId);
       if (!project || project.members.includes(currentUser.id)) return;
 
-      const updatedMembers = [...project.members, currentUser.id];
-      setProjects(prev => prev.map(p => p.id === projectId ? { ...p, members: updatedMembers } : p));
+      const updatedProject = { ...project, members: [...project.members, currentUser.id] };
       
       if (supabase) {
-        const { error } = await supabase.from('projects').update({ members: updatedMembers }).eq('id', projectId);
-        if (error) console.error("Error joining project:", error);
+        const { error } = await fileStorage.updateCollection('projects', updatedProject);
+        if (error) {
+            console.error("Error joining project:", error);
+            return;
+        }
       }
+      setProjects(prev => prev.map(p => p.id === projectId ? updatedProject : p));
   };
 
   const handleSubmitProject = async (projectId: string, submissionFile: File) => {

@@ -1,3 +1,5 @@
+
+
 import React, { useState } from 'react';
 import { Role } from '../types';
 import { ApsBrand } from '../components/ApsBrand';
@@ -5,7 +7,7 @@ import { validateText } from '../utils/validationUtils';
 
 interface SignUpPageProps {
   role: Role;
-  onSignUp: (name: string, email: string, studentClass: string, section: string, admissionNumber: string) => Promise<'success' | 'email-in-use'>;
+  onSignUp: (name: string, studentClass: string, section: string, admissionNumber: string) => Promise<'success' | 'email-in-use'>;
   onSwitchToLogin: () => void;
   onBack: () => void;
 }
@@ -15,7 +17,6 @@ const sections = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J'];
 
 export const SignUpPage = ({ role, onSignUp, onSwitchToLogin, onBack }: SignUpPageProps) => {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [studentClass, setStudentClass] = useState('1');
   const [section, setSection] = useState('A');
@@ -29,14 +30,23 @@ export const SignUpPage = ({ role, onSignUp, onSwitchToLogin, onBack }: SignUpPa
         setError(nameValidationError);
         return;
     }
+    const admNumValidationError = validateText(admissionNumber, 'Admission Number');
+     if (admNumValidationError) {
+        setError(admNumValidationError);
+        return;
+    }
+    if (!/^\d+$/.test(admissionNumber)) {
+        setError("Admission number must contain only digits.");
+        return;
+    }
     if (password.length < 6) {
         setError("Password must be at least 6 characters long.");
         return;
     }
     setError('');
-    const result = await onSignUp(name, email, studentClass, section, admissionNumber);
+    const result = await onSignUp(name, studentClass, section, admissionNumber);
     if (result === 'email-in-use') {
-      setError('Could not create account. The email might already be in use.');
+      setError('Could not create account. The admission number might already be in use.');
     }
   };
 
@@ -78,20 +88,14 @@ export const SignUpPage = ({ role, onSignUp, onSwitchToLogin, onBack }: SignUpPa
                   className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent sm:text-sm bg-white"
                   style={{ '--tw-ring-color': 'var(--color-primary)' } as React.CSSProperties}
                 />
+                <div className="mt-2 p-2 rounded-lg" style={{ backgroundColor: 'rgba(var(--color-text-main-rgb), 0.05)' }}>
+                    <span className="block text-xs font-semibold" style={{ color: 'rgba(var(--color-text-main-rgb), 0.6)' }}>School Email</span>
+                    <span className="font-mono" style={{ color: 'var(--color-text-main)' }}>
+                        <span className="font-bold">{admissionNumber || '...'}</span>@apsjodhpur.com
+                    </span>
+                </div>
               </div>
              )}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium" style={{ color: 'var(--color-text-main)' }}>Email Address</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                required
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent sm:text-sm bg-white"
-                style={{ '--tw-ring-color': 'var(--color-primary)' } as React.CSSProperties}
-              />
-            </div>
             {role === 'student' && (
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="w-full sm:w-1/2">

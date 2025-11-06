@@ -1,25 +1,27 @@
+
 import React, { useState } from 'react';
 import { Role } from '../types';
 import { ApsBrand } from '../components/ApsBrand';
 
 interface LoginPageProps {
   role: Role;
-  onLogin: (email: string) => Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'>;
+  onLogin: (identifier: string) => Promise<'success' | 'not-found' | 'wrong-password' | 'wrong-role'>;
   onSwitchToSignUp: () => void;
   onBack: () => void;
 }
 
 export const LoginPage = ({ role, onLogin, onSwitchToSignUp, onBack }: LoginPageProps) => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const result = await onLogin(email);
+    const result = await onLogin(identifier);
     if (result === 'not-found' || result === 'wrong-password') {
-      setError('Invalid email or password.');
+      const fieldName = role === 'student' ? 'admission number' : 'email';
+      setError(`Invalid ${fieldName} or password.`);
     } else if (result === 'wrong-role') {
         setError(`You are not registered as a ${role}. Please select the correct role.`);
     }
@@ -27,6 +29,9 @@ export const LoginPage = ({ role, onLogin, onSwitchToSignUp, onBack }: LoginPage
   
   const title = role === 'student' ? 'Student Login' : 'Admin Login';
   const subtitle = `Log in to your ${role} account.`;
+  const identifierLabel = role === 'student' ? 'Admission Number' : 'Email Address';
+  const identifierType = role === 'student' ? 'text' : 'email';
+  const identifierPlaceholder = role === 'student' ? 'e.g., 12345' : 'e.g., admin@test.com';
 
 
   return (
@@ -40,13 +45,14 @@ export const LoginPage = ({ role, onLogin, onSwitchToSignUp, onBack }: LoginPage
         <div className="bg-white p-8 rounded-2xl shadow-md">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium" style={{ color: 'var(--color-text-main)' }}>Email Address</label>
+              <label htmlFor="identifier" className="block text-sm font-medium" style={{ color: 'var(--color-text-main)' }}>{identifierLabel}</label>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                id="identifier"
+                type={identifierType}
+                value={identifier}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIdentifier(e.target.value)}
                 required
+                placeholder={identifierPlaceholder}
                 className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent sm:text-sm bg-white"
                 style={{ '--tw-ring-color': 'var(--color-primary)' } as React.CSSProperties}
               />
