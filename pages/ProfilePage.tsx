@@ -10,7 +10,7 @@ interface ProfilePageProps {
   user: Student;
   onUpdateUser: (user: Student) => void;
   onUpdatePassword: (currentPassword: string, newPassword: string) => Promise<'success' | 'incorrect-password'>;
-  onCreateAppeal: (claimedPercentage: number, reason: string, answerSheetFile: File) => void;
+  onCreateAppeal: (claimedPercentage: number, reason: string, answerSheetFile: File) => Promise<void>;
 }
 
 export const ProfilePage = ({ user, onUpdateUser, onUpdatePassword, onCreateAppeal }: ProfilePageProps) => {
@@ -90,8 +90,8 @@ export const ProfilePage = ({ user, onUpdateUser, onUpdatePassword, onCreateAppe
       setIsEditingName(false);
   };
 
-  const handleAppealSubmit = (claimedPercentage: number, reason: string, answerSheetFile: File) => {
-    onCreateAppeal(claimedPercentage, reason, answerSheetFile);
+  const handleAppealSubmit = async (claimedPercentage: number, reason: string, answerSheetFile: File) => {
+    await onCreateAppeal(claimedPercentage, reason, answerSheetFile);
     setIsAppealModalOpen(false);
   };
 

@@ -32,7 +32,7 @@ interface MainLayoutProps {
     messages: Message[];
     onSendMessage: (receiverId: string, text: string) => void;
     events: Event[];
-    onCreateAppeal: (claimedPercentage: number, reason: string, answerSheetFile: File) => void;
+    onCreateAppeal: (claimedPercentage: number, reason: string, answerSheetFile: File) => Promise<void>;
     onSubmitQuest: (submissionText: string) => void;
     onJoinProject: (projectId: string) => void;
     onSubmitProject: (projectId: string, submissionBase64: string) => void;
